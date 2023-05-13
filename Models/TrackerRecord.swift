@@ -1,13 +1,18 @@
-////
-////  TrackerRecord.swift
-////  Tracker
-////
-////  Created by Джами on 27.04.2023.
-////
 //
-//import UIKit
+//  TrackerRecord.swift
+//  Tracker
 //
-//struct TrackerRecord {
-//    let id: String
-//    let date: Date
-//}
+//  Created by Джами on 27.04.2023.
+//
+
+import Foundation
+
+struct TrackerRecord {
+    let id: UUID
+    let date: Date
+    
+    init(id: UUID, date: Date) {
+        self.id = id
+        self.date = date
+    }
+}
