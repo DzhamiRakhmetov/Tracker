@@ -17,13 +17,6 @@ import UIKit
         return label
     }()
      
-//    lazy var customImage: UIImageView = {
-//            let image = UIImageView()
-//            image.translatesAutoresizingMaskIntoConstraints = false
-//        image.image = UIImage(named: <#T##String#>)
-//        
-//            return image
-//        }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

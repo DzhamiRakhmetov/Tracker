@@ -11,8 +11,7 @@ class DataManager {
     static let shared = DataManager()
     
     var categories: [TrackerCategory] = [
-    TrackerCategory(
-        title: "Уборка",
+    TrackerCategory(title: "Уборка",
         trackers: [
         Tracker(id: UUID(),
                 name: "Помыть пол",
@@ -23,7 +22,14 @@ class DataManager {
         Tracker(id: UUID(),
                 name: "Погладить одежду",
                 color: .custom.colorSelection7,
-                emoji: "",
-                schedule: [WeekDay.tuesday, WeekDay.wednesday])])]
+                emoji: "😡",
+                schedule: [WeekDay.tuesday, WeekDay.wednesday])]),
     
+    TrackerCategory(title: "Учеба",
+                    trackers: [
+                    Tracker(id: UUID(),
+                            name: "Почитать",
+                            color: .custom.colorSelection8,
+                            emoji: "❤️",
+                            schedule: [WeekDay.monday, WeekDay.tuesday])])]
 }

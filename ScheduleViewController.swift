@@ -117,7 +117,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {return UITableViewCell()}
-        cell.textLabel?.text = WeekDay.allCases[indexPath.row].rawValue
+        cell.textLabel?.text = WeekDay.allCases[indexPath.row].value
         cell.backgroundColor = .custom.backgroundDay
         
         let switchView = UISwitch(frame: .zero)

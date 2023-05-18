@@ -7,9 +7,15 @@
 
 import UIKit
 
+protocol NewCategoryViewControllerDelegate: AnyObject {
+    func setCategory(category: String?)
+}
+
 final class NewCategoryViewController: UIViewController {
     
+    weak var delegate: TrackerCreationViewController?
     private var newCategoryName: String?
+    
     private lazy var categoryLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -88,13 +94,22 @@ final class NewCategoryViewController: UIViewController {
     
     @objc
     func doneButtonClicked() {
-        dismiss(animated: true)
+        dismiss(animated: true) {
+            print("New Category - \(String(describing: self.newCategoryName))")
+            
+            
+          //  self.delegate?.setCategory(category: self.newCategoryName)
+            self.disableDoneButton()
+            self.newCategoryName = nil
+            self.categoryNameTextFiled.text = nil
+        }
     }
 }
 
 // MARK: - Extensions
 
 extension NewCategoryViewController: UITextFieldDelegate {
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         view.endEditing(true)
     }
@@ -104,6 +119,7 @@ extension NewCategoryViewController: UITextFieldDelegate {
             disableDoneButton()
         } else {
             enableDoneButton()
+            newCategoryName = textField.text
         }
     }
 }

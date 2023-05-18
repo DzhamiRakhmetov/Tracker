@@ -16,8 +16,11 @@ final class TrackerCreationViewController: UIViewController {
     var dataForTableView = ["Категория", "Расписание"]
     var trackerStore: TrackerStoreProtocol?
     
-    
+    private var selectedTrackerName: String?
+    private var selectedCategory: String?
     private var selectedSchedule: [WeekDay] = []
+    private var selectedColor: UIColor?
+    private var selectedEmoji: String?
     
     private let emojies: [String] = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
     
@@ -28,7 +31,7 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     lazy var trackersViewController = TrackersViewController()
-    lazy var scheduleViewController = ScheduleViewController()
+   
     lazy var categoriesViewController = CategoriesViewController()
     
     private lazy var contentView: UIView = {
@@ -163,6 +166,21 @@ final class TrackerCreationViewController: UIViewController {
         return label
     }()
     
+    private lazy var selectedBackgroundForEmoji: UIView = {
+       let view = UIView()
+        view.backgroundColor = .custom.gray
+        view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
+        return view
+    }()
+    
+    private lazy var selectedBackgroundForColor: UIView = {
+       let view = UIView()
+        view.layer.cornerRadius = 8
+        view.layer.borderWidth = 3
+        view.layer.masksToBounds = true
+        return view
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -233,11 +251,14 @@ final class TrackerCreationViewController: UIViewController {
     
     
     private func tapScheduleCell(){
+        lazy var scheduleViewController = ScheduleViewController()
         scheduleViewController.delegate = self
         present(scheduleViewController, animated: true)
     }
     
     private func tapCategoriesCell(){
+         lazy var newCategoryViewController = NewCategoryViewController()
+        newCategoryViewController.delegate = self
         present(categoriesViewController, animated: true)
     }
     
@@ -255,21 +276,19 @@ final class TrackerCreationViewController: UIViewController {
 //        scrollView.contentSize = CGSize(width: scrollView.contentSize.width, height: scrollView.contentSize.height + 35)
 //
 //    }
-    
-    @objc func createAction() {
+        @objc func createAction() {
+      //  guard let selectedCategory = selectedCategory else {return}
         let newTracker = Tracker(
             id: UUID(),
             name: trackerTextFiled.text ?? "",
-            color: .custom.colorSelection5,
-            emoji: "❤️",
+            color: selectedColor ?? .custom.black,
+            emoji: selectedEmoji ?? "",
             schedule: selectedSchedule)
         
-//        trackerStore?.createTracker(newTracker, categoryName: "Важное")
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
-      //  popToViewController(trackersViewController, animated: true)
         dismiss(animated: true) {
-            self.trackerStore?.createTracker(newTracker, categoryName: "Важное")
+            self.trackerStore?.createTracker(newTracker, categoryName: "Категория 1")
         }
     }
     
@@ -311,7 +330,6 @@ extension TrackerCreationViewController: UITableViewDelegate {
         default:
             tapScheduleCell()
         }
-        //        indexPath.row == 0 ? tapCategoriesCell() : tapScheduleCell()
     }
 }
 
@@ -365,6 +383,25 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
             return cell
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else {return}
+        
+        switch collectionView {
+        case emojisCollectionView:
+            cell.selectedBackgroundView = selectedBackgroundForEmoji
+            selectedEmoji = emojies[indexPath.row]
+        default:
+            selectedBackgroundForColor.layer.borderColor = colors[indexPath.row].cgColor.copy(alpha: 0.3)
+            cell.selectedBackgroundView = selectedBackgroundForColor
+            selectedColor = colors[indexPath.row]
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else {return}
+        cell.selectedBackgroundView = nil
+    }
 }
 
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
@@ -376,3 +413,9 @@ extension TrackerCreationViewController: ScheduleViewControllerDelegate {
         buttonsTableView.reloadData()
     }
 }
+//
+//extension TrackerCreationViewController: NewCategoryViewControllerDelegate {
+//    func setCategory(category: String?) {
+//        category = self.selectedCategory
+//    }
+//}

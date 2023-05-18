@@ -9,8 +9,6 @@ import UIKit
 
 final class CategoriesViewController: UIViewController {
     
-    lazy var newCategoryViewController = NewCategoryViewController()
-    
     private lazy var header: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -57,8 +55,8 @@ final class CategoriesViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.layer.masksToBounds = true
         tableView.register(ButtonCell.self, forCellReuseIdentifier: "ButtonCell")
-//        tableView.delegate = self
-//        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.dataSource = self
         
         return tableView
     }()
@@ -76,10 +74,10 @@ final class CategoriesViewController: UIViewController {
             header.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
             header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-//            categoriesTableView.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 38),
-//            categoriesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-//            categoriesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-//            categoriesTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80),
+            categoriesTableView.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 38),
+            categoriesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            categoriesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            categoriesTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80),
             
             stubImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stubImage.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -30),
@@ -96,16 +94,32 @@ final class CategoriesViewController: UIViewController {
     
     @objc
     func doneButtonClicked() {
+        let newCategoryViewController = NewCategoryViewController()
         present(newCategoryViewController, animated: true)
     }
 }
 
-//extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        <#code#>
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        <#code#>
-//    }
-//}
+extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {return UITableViewCell()}
+        
+        
+        cell.contentView.backgroundColor = .custom.backgroundDay
+        cell.label.text = "Категория 1"
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+    }
+}
+
+

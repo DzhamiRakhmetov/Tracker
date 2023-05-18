@@ -8,10 +8,8 @@
 import UIKit
 
 final class TrackerTypeViewController: UIViewController {
-    weak var delegate: TrackerStoreProtocol?
     
-    //TODO:-
-    lazy var trackerCreationViewController = TrackerCreationViewController()
+    weak var delegate: TrackerStoreProtocol?
     
     private lazy var titileLabel: UILabel = {
         let label = UILabel()

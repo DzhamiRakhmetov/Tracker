@@ -8,8 +8,7 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func completeTracker(id: UUID, at indexPath: IndexPath)
-    func uncompleteTracher(id: UUID, at indexPath: IndexPath)
+    func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool)
 }
 
 final class TrackerCell: UICollectionViewCell {
@@ -146,10 +145,6 @@ final class TrackerCell: UICollectionViewCell {
             assertionFailure("no trackerID")
             return
         }
-        if isCompletedToday {
-            delegate?.uncompleteTracher(id: trackerId, at: indexPath)
-        } else {
-            delegate?.completeTracker(id: trackerId, at: indexPath)
-        }
+        delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
     }
 }
