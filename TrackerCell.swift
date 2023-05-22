@@ -17,6 +17,7 @@ final class TrackerCell: UICollectionViewCell {
     private var isCompletedToday: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
+    private var selectedDate: Date?
     
     private lazy var trackerView: UIView = {
         let view = UIView()
@@ -69,14 +70,6 @@ final class TrackerCell: UICollectionViewCell {
         return button
     }()
     
-    private let plusImage: UIImage = {
-        let pointSize = UIImage.SymbolConfiguration(pointSize: 11)
-        let image = UIImage(systemName: "plus", withConfiguration: pointSize) ?? UIImage()
-        return image
-    }()
-    
-    private let doneImage = UIImage(named: "Done")
-    
     // MARK: - LifeCycle
     
     override init(frame: CGRect) {
@@ -87,9 +80,29 @@ final class TrackerCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     // MARK: - Helpers
-    func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath) {
+    
+    func setDoneImage() {
+        let doneImage = UIImage(named: "Done")
+        dayCounterButton.setImage(doneImage, for: .normal)
+        dayCounterButton.backgroundColor = dayCounterButton.backgroundColor?.withAlphaComponent(0.5)
+    }
+    
+    func setPlusImage() {
+        let pointSize = UIImage.SymbolConfiguration(pointSize: 11)
+        let plusImage = UIImage(systemName: "plus", withConfiguration: pointSize)
+        dayCounterButton.setImage(plusImage, for: .normal)
+        dayCounterButton.backgroundColor = dayCounterButton.backgroundColor?.withAlphaComponent(1.0)
+    }
+    
+    func setCheckButtonIsEnabled(_ isEnabled: Bool) {
+        dayCounterButton.isEnabled = isEnabled
+    }
+    
+    
+    func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, selectedDate: Date, indexPath: IndexPath) {
         self.trackerId = tracker.id
         self.isCompletedToday = isCompletedToday
+        self.selectedDate = selectedDate
         self.indexPath = indexPath
         
         let color = tracker.color
@@ -100,13 +113,30 @@ final class TrackerCell: UICollectionViewCell {
         
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
-        dayCounterLabel.text = "День"
+        dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
         
-        let image = isCompletedToday ? doneImage : plusImage
-        dayCounterButton.setImage(image, for: .normal)
+        
+        let image = isCompletedToday ? setDoneImage() : setPlusImage()
+        
     }
     
     
+    
+    private func dayString(for count: Int) -> String {
+        let mod10 = count % 10
+        let mod100 = count % 100
+        let not10To20 = mod100 < 10 || mod100 > 20
+        
+        if count == 0 {
+            return "дней"
+        } else if mod10 == 1 && not10To20 {
+            return "день"
+        } else if (mod10 >= 2 && mod10 <= 4) && not10To20 {
+            return "дня"
+        } else {
+            return "дней"
+        }
+    }
     
     
     private func setUpConstraints() {
@@ -141,10 +171,19 @@ final class TrackerCell: UICollectionViewCell {
     
     
     @objc func increaseDayCounter() {
-        guard let trackerId = trackerId, let indexPath = indexPath else {
+        
+        guard let trackerId = trackerId, let indexPath = indexPath, let selectedDate = selectedDate else {
             assertionFailure("no trackerID")
             return
         }
-        delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+        
+        let currentDate = Date()
+        if selectedDate > currentDate {
+            return
+        } else {
+            dayCounterButton.isEnabled = true
+            delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+            
+        }
     }
 }

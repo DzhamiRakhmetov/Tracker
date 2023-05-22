@@ -15,8 +15,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private let dataManager = DataManager.shared
     var currentDate: Date = .init()
     
-   
-    
     private lazy var addButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -207,6 +205,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     @objc private func dateChanged(_ picker: UIDatePicker) {
+        currentDate = datePicker.date.startOfDay
         reloadVisibleCategories(text: searchField.text, date: picker.date)
     }
     
@@ -252,15 +251,18 @@ extension TrackersViewController: UICollectionViewDataSource {
     
     
     fileprivate func setupCell(_ indexPath: IndexPath, _ cell: TrackerCell) {
+        
         let cellData = visibleCategories
         let tracker = cellData[indexPath.section].trackers[indexPath.row]
-        
         cell.delegate = self
         
         let isCompletedToday = isTrackerCompletedToday(id: tracker.id)
+        let completedDays = completedTrackers.filter { $0.id == tracker.id}.count
         cell.configure(
             with: tracker,
             isCompletedToday: isCompletedToday,
+            completedDays: completedDays,
+            selectedDate: datePicker.date,
             indexPath: indexPath)
     }
     
@@ -278,9 +280,6 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
     }
     
-    
-    
-   
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderSectionView", for: indexPath) as? HeaderSectionView
@@ -308,8 +307,8 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 extension TrackersViewController: TrackerCellDelegate {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool) {
-        isOn ? uncompleteTracher(id, indexPath) : completeTracker(id, indexPath)
         
+        isOn ? uncompleteTracher(id, indexPath) : completeTracker(id, indexPath)
         print("*****")
         completedTrackers.forEach({print($0.id)})
         print("*****")
@@ -325,7 +324,7 @@ extension TrackersViewController: TrackerCellDelegate {
     }
     
     private func uncompleteTracher(_ id: UUID, _ indexPath: IndexPath) {
-        completedTrackers.removeAll{trackerRecord in
+        completedTrackers.removeAll{ trackerRecord in
             let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
             
             return trackerRecord.id == id && isSameDay
@@ -335,11 +334,9 @@ extension TrackersViewController: TrackerCellDelegate {
 
 
 
-
-
 extension TrackersViewController: TrackerStoreProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
-        visibleCategories.append(.init(title: categoryName, trackers: [tracker]))
+        categories.append(.init(title: categoryName, trackers: [tracker]))
         print(tracker)
         print(categoryName)
         collectionView.reloadData()

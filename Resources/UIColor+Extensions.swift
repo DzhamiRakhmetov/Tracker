@@ -8,12 +8,7 @@
 import UIKit
 
 extension UIColor {
-//    static let  red = UIColor(named: NameColor.red.rawValue)
-//    static let  whiteDay = UIColor(named: "White.day")
-//    static let  blue =  UIColor(named: "Blue")
-//    static let backgroundDay = UIColor(named: "Background.day")
-    
-    
+
    static var custom: CustomColor  { return CustomColor()}
     
     struct CustomColor {
@@ -88,3 +83,23 @@ extension UITextField {
         self.leftViewMode = .always
     }
 }
+
+extension Date {
+    var startOfDay: Date { Calendar.current.startOfDay(for: self) }
+}
+
+//extension Int {
+//    var days: String {
+//        if (11...14).contains(self % 100) {
+//            return String(self) + "дней"
+//        }
+//        switch (self % 10) {
+//        case 1:
+//            return String(self) + "день"
+//        case 2,3,4:
+//            return String(self) + "дня"
+//        default:
+//            return String(self) + "дней"
+//        }
+//    }
+//}
