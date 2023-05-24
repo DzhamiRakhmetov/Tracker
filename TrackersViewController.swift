@@ -336,9 +336,12 @@ extension TrackersViewController: TrackerCellDelegate {
 
 extension TrackersViewController: TrackerStoreProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
-        categories.append(.init(title: categoryName, trackers: [tracker]))
+//        categories.append(.init(title: categoryName, trackers: [tracker]))
+//        collectionView.reloadData()
+        dataManager.categories.append(.init(title: categoryName, trackers: [tracker]))
+        reloadData()
+        collectionView.reloadData()
         print(tracker)
         print(categoryName)
-        collectionView.reloadData()
     }
 }

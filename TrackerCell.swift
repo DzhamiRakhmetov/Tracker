@@ -110,6 +110,7 @@ final class TrackerCell: UICollectionViewCell {
         
         trackerView.backgroundColor = color
         dayCounterButton.backgroundColor = color
+        dayCounterButton.isHidden = selectedDate > Date()
         
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
@@ -172,18 +173,11 @@ final class TrackerCell: UICollectionViewCell {
     
     @objc func increaseDayCounter() {
         
-        guard let trackerId = trackerId, let indexPath = indexPath, let selectedDate = selectedDate else {
+        guard let trackerId = trackerId, let indexPath = indexPath else {
             assertionFailure("no trackerID")
             return
         }
-        
-        let currentDate = Date()
-        if selectedDate > currentDate {
-            return
-        } else {
             dayCounterButton.isEnabled = true
             delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
-            
-        }
     }
 }
