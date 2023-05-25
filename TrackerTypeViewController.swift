@@ -9,7 +9,7 @@ import UIKit
 
 final class TrackerTypeViewController: UIViewController {
     
-    lazy var trackerCreationViewController = TrackerCreationViewController()
+    weak var delegate: TrackerStoreProtocol?
     
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
@@ -59,7 +59,7 @@ final class TrackerTypeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .whiteDay
+        view.backgroundColor = .custom.white
         setUpConstraints()
     }
     
@@ -80,6 +80,16 @@ final class TrackerTypeViewController: UIViewController {
     
     @objc
     func regularButtonClicked() {
-        present(trackerCreationViewController, animated: true)
+        let vc = TrackerCreationViewController()
+        vc.trackerStore = self
+        present(vc, animated: true)
+    }
+}
+
+extension TrackerTypeViewController: TrackerStoreProtocol {
+    func createTracker(_ tracker: Tracker, categoryName: String) {
+        dismiss(animated: true) {
+            self.delegate?.createTracker(tracker, categoryName: categoryName)
+        }
     }
 }
