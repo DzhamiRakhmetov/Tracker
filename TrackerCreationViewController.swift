@@ -342,6 +342,7 @@ extension TrackerCreationViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {
             return UITableViewCell()
         }
+        cell.accessoryType = .disclosureIndicator
         cell.textLabel?.text = dataForTableView[indexPath.row]
         cell.backgroundColor = .custom.backgroundDay
         if indexPath.row == 0 {
