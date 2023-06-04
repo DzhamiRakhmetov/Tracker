@@ -9,6 +9,8 @@ import UIKit
 
 final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
+    lazy var trackerStore: TrackerStoreProtocol = TrackerStore(delegate: self)
+    lazy var recordStore: TrackerRecordStoreProtocol = TrackerRecordStore()
     var categories = [TrackerCategory]()
     var completedTrackers = [TrackerRecord]()
     var visibleCategories = [TrackerCategory]()
@@ -191,11 +193,22 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         collectionView.reloadData()
     }
     
+    private func saveTrackerRecord(for trackerID: UUID) {
+        let trackerRecord = TrackerRecord(id: trackerID, date: currentDate)
+        try? recordStore.save(trackerRecord)
+    }
+    
+    private func deleteTrackerRecord(for trackerID: UUID) {
+        let trackerRecord = TrackerRecord(id: trackerID, date: currentDate)
+        try? recordStore.delete(trackerRecord)
+    }
+    
     // MARK: - @objc
     
     @objc private func addNewTracker() {
         let trackerTypeViewController = TrackerTypeViewController()
-        trackerTypeViewController.delegate = self
+//        trackerTypeViewController.delegate = self
+        trackerTypeViewController.trackerStore = trackerStore
         present(trackerTypeViewController, animated: true)
     }
     
@@ -225,7 +238,11 @@ extension TrackersViewController: UITextFieldDelegate {
     }
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
-        print(#function, textField.text ?? "")
+        if let search = textField.text, searchField != "" {
+            trackerStore.trackersFor(currentDate, searchRequest: search)
+        } else {
+            trackerStore.trackersFor(currentDate, searchRequest: nil)
+        }
     }
 }
 
@@ -238,13 +255,14 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let tracker = visibleCategories[section].trackers
-        return tracker.count
+//        let tracker = visibleCategories[section].trackers
+//        return tracker.count
+        return trackerStore.numberOfItemsInSection(section)
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        print("numberOfSections - \(visibleCategories.count)")
-        let count = visibleCategories.count
+//        let count = visibleCategories.count
+        let count = trackerStore.numberOfSections
         isHiddenPlacholder = count > 0
         return count
     }
@@ -282,10 +300,11 @@ extension TrackersViewController: UICollectionViewDataSource {
     
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderSectionView", for: indexPath) as? HeaderSectionView
-        else {return UICollectionReusableView()}
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderSectionView", for: indexPath) as? HeaderSectionView,
+        let titileCategory = trackerStore.name(of: indexPath.section) else {return UICollectionReusableView()}
         
-        let titileCategory = visibleCategories[indexPath.section].title
+//        let titileCategory = visibleCategories[indexPath.section].title
+        
         view.setTitle(text: titileCategory)
         return view
     }
@@ -308,7 +327,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: TrackerCellDelegate {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool) {
         
-        isOn ? uncompleteTracher(id, indexPath) : completeTracker(id, indexPath)
+        isOn ? uncompleteTracker(id, indexPath) : completeTracker(id, indexPath)
         print("*****")
         completedTrackers.forEach({print($0.id)})
         print("*****")
@@ -323,7 +342,7 @@ extension TrackersViewController: TrackerCellDelegate {
         completedTrackers.append(trackerRecord)
     }
     
-    private func uncompleteTracher(_ id: UUID, _ indexPath: IndexPath) {
+    private func uncompleteTracker(_ id: UUID, _ indexPath: IndexPath) {
         completedTrackers.removeAll{ trackerRecord in
             let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
             
@@ -334,10 +353,8 @@ extension TrackersViewController: TrackerCellDelegate {
 
 
 
-extension TrackersViewController: TrackerStoreProtocol {
+extension TrackersViewController: TrackerTypeProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
-//        categories.append(.init(title: categoryName, trackers: [tracker]))
-//        collectionView.reloadData()
         dataManager.categories.append(.init(title: categoryName, trackers: [tracker]))
         reloadData()
         collectionView.reloadData()

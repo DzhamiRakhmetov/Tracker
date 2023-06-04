@@ -7,14 +7,20 @@
 
 import UIKit
 
-protocol TrackerStoreProtocol: AnyObject {
+// MARK: - Protocol
+
+protocol TrackerTypeProtocol: AnyObject {
     func createTracker(_ tracker: Tracker, categoryName: String)
 }
+
+// MARK: - Class TrackerCreationViewController
 
 final class TrackerCreationViewController: UIViewController {
     
     var dataForTableView = ["Категория", "Расписание"]
+    var trackerType: TrackerTypeProtocol?
     var trackerStore: TrackerStoreProtocol?
+   
     
     private var selectedTrackerName: String?
     private var selectedCategory: String?
@@ -182,6 +188,8 @@ final class TrackerCreationViewController: UIViewController {
         return view
     }()
     
+    // MARK: - LifeCycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .custom.white
@@ -189,6 +197,7 @@ final class TrackerCreationViewController: UIViewController {
         
     }
     
+    // MARK: - Helpers
     
     private func setUpConstraints() {
         view.addSubview(scrollView)
@@ -276,6 +285,9 @@ final class TrackerCreationViewController: UIViewController {
 //        scrollView.contentSize = CGSize(width: scrollView.contentSize.width, height: scrollView.contentSize.height + 35)
 //
 //    }
+    
+    // MARK: - @objc func
+    
         @objc func createAction() {
       //  guard let selectedCategory = selectedCategory else {return}
         let newTracker = Tracker(
@@ -288,7 +300,7 @@ final class TrackerCreationViewController: UIViewController {
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
         dismiss(animated: true) {
-            self.trackerStore?.createTracker(newTracker, categoryName: "Категория 1")
+            self.trackerType?.createTracker(newTracker, categoryName: "Категория 1")
         }
     }
     

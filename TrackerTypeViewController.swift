@@ -9,7 +9,8 @@ import UIKit
 
 final class TrackerTypeViewController: UIViewController {
     
-    weak var delegate: TrackerStoreProtocol?
+    weak var delegate: TrackerTypeProtocol?
+    var trackerStore: TrackerStoreProtocol?
     
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
@@ -81,12 +82,14 @@ final class TrackerTypeViewController: UIViewController {
     @objc
     func regularButtonClicked() {
         let vc = TrackerCreationViewController()
-        vc.trackerStore = self
+        vc.trackerType = self
         present(vc, animated: true)
     }
 }
 
-extension TrackerTypeViewController: TrackerStoreProtocol {
+// MARK: - Extensions
+
+extension TrackerTypeViewController: TrackerTypeProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
         dismiss(animated: true) {
             self.delegate?.createTracker(tracker, categoryName: categoryName)
