@@ -23,6 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        ValueTransformer.setValueTransformer(WeekDayArrayTransformer(), forName: NSValueTransformerName("WeekDayArrayTransformer"))
         return true
     }
 

@@ -238,7 +238,7 @@ extension TrackersViewController: UITextFieldDelegate {
     }
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
-        if let search = textField.text, searchField != "" {
+        if let search = textField.text, searchField.state.isEmpty {
             trackerStore.trackersFor(currentDate, searchRequest: search)
         } else {
             trackerStore.trackersFor(currentDate, searchRequest: nil)
@@ -285,7 +285,9 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell" , for: indexPath) as? TrackerCell else {return UICollectionViewCell()}
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell" , for: indexPath) as? TrackerCell,
+              let tracker = trackerStore.object(at: indexPath) else {return UICollectionViewCell()}
+             // let trackerRecords = trackerStore.records(for: indexPath)
         
         setupCell(indexPath, cell)
         return cell
@@ -322,7 +324,7 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - TrackerCellDelegate
+// MARK: - extension TrackerCellDelegate
 
 extension TrackersViewController: TrackerCellDelegate {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool) {
@@ -360,5 +362,21 @@ extension TrackersViewController: TrackerTypeProtocol {
         collectionView.reloadData()
         print(tracker)
         print(categoryName)
+    }
+}
+
+// MARK: - extension TrackerStoreDelegate
+
+extension TrackersViewController: TrackerStoreDelegate {
+    func didUpdateTracker(_ insertedSections: IndexSet, _ deletedSections: IndexSet, _ updatedIndexPaths: [IndexPath], _ insertedIndexPaths: [IndexPath], _ deletedIndexPaths: [IndexPath]) {
+        DispatchQueue.main.async {
+            self.collectionView.performBatchUpdates {
+                self.collectionView.insertSections(insertedSections)
+                self.collectionView.deleteSections(deletedSections)
+                self.collectionView.reloadItems(at: updatedIndexPaths)
+                self.collectionView.insertItems(at: insertedIndexPaths)
+                self.collectionView.deleteItems(at: deletedIndexPaths)
+            }
+        }
     }
 }

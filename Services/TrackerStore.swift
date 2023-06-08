@@ -19,6 +19,8 @@ enum TrackerStoreError: Error {
     case hexDeserializationError
 }
 
+
+
 // MARK: - Protocol
 
 protocol TrackerStoreProtocol {
@@ -28,8 +30,8 @@ protocol TrackerStoreProtocol {
     func object(at indexPath: IndexPath) -> Tracker?
     func saveTracker(tracker: Tracker) throws
     func deleteTracker(at indexPath: IndexPath) throws
-    func trackersFor(_ currentDate: String, searchRequest: String?)
-    func records(for trackerIndexPath: IndexPath) -> Set<TrackerRecordCoreData>
+    func trackersFor(_ currentDate: Date, searchRequest: String?)
+    func records(for trackerIndexPath: IndexPath) -> Set<TrackerRecord>
 }
 
 protocol TrackerStoreDelegate: AnyObject {
@@ -47,6 +49,7 @@ final class TrackerStore: NSObject {
     private lazy var updatedIndexPaths: [IndexPath] = []
     private lazy var insertedSections = IndexSet()
     private lazy var deletedSections = IndexSet()
+    
     
     
     private lazy var fetchedResultController: NSFetchedResultsController<TrackerCoreData> = {
@@ -86,6 +89,16 @@ final class TrackerStore: NSObject {
         updatedIndexPaths = []
         insertedSections = IndexSet()
         deletedSections = IndexSet()
+    }
+    
+    private func makeRecord(from recordCoreData: TrackerRecordCoreData) throws -> TrackerRecord {
+        guard let trackerID = recordCoreData.tracker?.trackerID else {
+            throw TrackerRecordError.invalidTrackerID
+        }
+        guard let date = recordCoreData.date else {
+            throw TrackerRecordError.invalidDate
+        }
+        return TrackerRecord(id: trackerID, date: date)
     }
    
     private func makeTracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
@@ -191,12 +204,28 @@ extension TrackerStore: TrackerStoreProtocol {
     }
     
     // фильтрция для поиска
-    func trackersFor(_ currentDate: String, searchRequest: String?) {
-
+    func trackersFor(_ currentDate: Date, searchRequest: String?) {
+        if let searchRequest = searchRequest {
+            fetchedResultController.fetchRequest.predicate = NSPredicate(format: "%K CONTAINS [n] %@ AND %K CONTAINS [n]", #keyPath(TrackerCoreData.schedule), currentDate as CVarArg,
+                #keyPath(TrackerCoreData.name), searchRequest)
+        } else {
+            fetchedResultController.fetchRequest.predicate = NSPredicate(format: "%K CONTAINS [n]",
+                #keyPath(TrackerCoreData.schedule), currentDate as CVarArg)
+        }
     }
-
-    func records(for trackerIndexPath: IndexPath) -> Set<TrackerRecordCoreData> {
-
+    
+    
+    func records(for trackerIndexPath: IndexPath) -> Set<TrackerRecord> {
+        let trackerCoreData = fetchedResultController.object(at: trackerIndexPath)
+        guard let trackerRecordsCoreData = trackerCoreData.records as? Set<TrackerRecordCoreData> else {
+            return Set<TrackerRecord>()
+        }
+        do {
+            let trackerRecords = try trackerRecordsCoreData.map { try makeRecord(from: $0)}
+            return Set(trackerRecords)
+        } catch {
+            return Set<TrackerRecord>()
+        }
     }
 }
 
