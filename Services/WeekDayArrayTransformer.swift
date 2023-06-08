@@ -32,5 +32,6 @@ class WeekDayArrayTransformer: ValueTransformer {
             return weekDayArray
         }
         return nil
+        
     }
 }
