@@ -300,7 +300,9 @@ final class TrackerCreationViewController: UIViewController {
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
         dismiss(animated: true) {
-            self.trackerType?.createTracker(newTracker, categoryName: "Категория 1")
+         //   self.trackerType?.createTracker(newTracker, categoryName: "Категория 1")
+            try? self.trackerStore?.saveTracker(tracker: newTracker, in: "Категория 1")
+            
         }
     }
     

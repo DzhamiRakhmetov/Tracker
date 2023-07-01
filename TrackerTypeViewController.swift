@@ -83,6 +83,7 @@ final class TrackerTypeViewController: UIViewController {
     func regularButtonClicked() {
         let vc = TrackerCreationViewController()
         vc.trackerType = self
+        vc.trackerStore = trackerStore
         present(vc, animated: true)
     }
 }

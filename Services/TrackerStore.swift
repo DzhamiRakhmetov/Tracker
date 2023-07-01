@@ -15,7 +15,7 @@ enum TrackerStoreError: Error {
     case invalidTrackerName
     case invalidTrackerColor
     case invalidTrackerEmoji
-    case invalidTrackerScheduleString
+    case invalidTrackerScheduleInt
     case hexDeserializationError
 }
 
@@ -28,7 +28,7 @@ protocol TrackerStoreProtocol {
     func numberOfItemsInSection(_ section: Int) -> Int
     func name(of section: Int) -> String?
     func object(at indexPath: IndexPath) -> Tracker?
-    func saveTracker(tracker: Tracker) throws
+    func saveTracker(tracker: Tracker, in category: String) throws
     func deleteTracker(at indexPath: IndexPath) throws
     func trackersFor(_ currentDate: Date, searchRequest: String?)
     func records(for trackerIndexPath: IndexPath) -> Set<TrackerRecord>
@@ -54,20 +54,27 @@ final class TrackerStore: NSObject {
     
     private lazy var fetchedResultController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = TrackerCoreData.fetchRequest()
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "category.title", ascending: true),
-            NSSortDescriptor(key: "name", ascending: true)]
-        fetchRequest.predicate = NSPredicate(format: "%K CONTAINS[n] %@", #keyPath (TrackerCoreData.schedule))
+        
+        fetchRequest.sortDescriptors = []
+//            NSSortDescriptor(keyPath: \TrackerCoreData.category?.title, ascending: true),
+//            NSSortDescriptor(key: "name", ascending: true)]
+//
+        let key = #keyPath (TrackerCoreData.schedule)
+        print(key)
+      //  fetchRequest.predicate = NSPredicate(format: "%K CONTAINS[n] %@", #keyPath (TrackerCoreData.schedule), [WeekDay.monday.rawValue])
         
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+        sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
             cacheName: nil)
         
         controller.delegate = self
-        try? controller.performFetch()
-        
+        do {
+            try controller.performFetch()
+        } catch let error {
+            print(error.localizedDescription)
+        }
         return controller
     }()
     
@@ -117,10 +124,12 @@ final class TrackerStore: NSObject {
         guard let emoji = trackerCoreData.emoji else {
             throw TrackerStoreError.invalidTrackerEmoji
         }
-        guard let schedule = trackerCoreData.schedule else {
-            throw TrackerStoreError.invalidTrackerScheduleString
+        guard let scheduleInt = trackerCoreData.schedule else {
+            throw TrackerStoreError.invalidTrackerScheduleInt
         }
-        return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule as! [WeekDay])
+        let schedule = scheduleInt.compactMap { WeekDay(rawValue: $0)}
+        
+        return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule )
     }
     
 }
@@ -193,14 +202,40 @@ extension TrackerStore: TrackerStoreProtocol {
        try context.save()
     }
     
-    func saveTracker(tracker: Tracker) throws {
-        let trackerCoreData = TrackerCoreData(context: context)
-        trackerCoreData.trackerID = tracker.id
-        trackerCoreData.name = tracker.name
-        trackerCoreData.color = UIColorMarshalling.serialize(color: tracker.color)
-        trackerCoreData.emoji = tracker.emoji
-        trackerCoreData.schedule = tracker.schedule.compactMap {$0.rawValue} as NSObject
-        try context.save()
+    func saveTracker(tracker: Tracker, in category: String) throws {
+        let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+        request.returnsObjectsAsFaults = false
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.title), category)
+        
+        guard var categoryCoreData = try? context.fetch(request) else { return }
+        if categoryCoreData.isEmpty {
+            let model = TrackerCategoryCoreData(context: context)
+            model.title = category
+            model.trackers = []
+            do {
+                try context.save()
+                categoryCoreData = try context.fetch(request)
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+        
+        do {
+            let trackerCoreData = TrackerCoreData(context: context)
+            trackerCoreData.trackerID = tracker.id
+            
+            trackerCoreData.name = tracker.name
+            trackerCoreData.color = UIColorMarshalling.serialize(color: tracker.color)
+            trackerCoreData.emoji = tracker.emoji
+            trackerCoreData.schedule = tracker.schedule.map {$0.rawValue} as [Int]
+            trackerCoreData.category = categoryCoreData.first
+            trackerCoreData.records = []
+            try context.save()
+        }
+        catch let error {
+            print(error.localizedDescription)
+        }
+        
     }
     
     // фильтрция для поиска

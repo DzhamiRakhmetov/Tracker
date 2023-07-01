@@ -271,6 +271,8 @@ extension TrackersViewController: UICollectionViewDataSource {
     fileprivate func setupCell(_ indexPath: IndexPath, _ cell: TrackerCell) {
         
         let cellData = visibleCategories
+      
+        print("cell data - \(cellData)")
         let tracker = cellData[indexPath.section].trackers[indexPath.row]
         cell.delegate = self
         
@@ -283,11 +285,11 @@ extension TrackersViewController: UICollectionViewDataSource {
             selectedDate: datePicker.date,
             indexPath: indexPath)
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell" , for: indexPath) as? TrackerCell,
               let tracker = trackerStore.object(at: indexPath) else {return UICollectionViewCell()}
-             // let trackerRecords = trackerStore.records(for: indexPath)
+              let trackerRecords = trackerStore.records(for: indexPath)
         
         setupCell(indexPath, cell)
         return cell
