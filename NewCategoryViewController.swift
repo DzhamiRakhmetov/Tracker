@@ -13,7 +13,7 @@ protocol NewCategoryViewControllerDelegate: AnyObject {
 
 final class NewCategoryViewController: UIViewController {
     
-    weak var delegate: TrackerCreationViewController?
+    weak var delegate: NewCategoryViewControllerDelegate?
     private var newCategoryName: String?
     
     private lazy var categoryLabel: UILabel = {
@@ -94,14 +94,15 @@ final class NewCategoryViewController: UIViewController {
     
     @objc
     func doneButtonClicked() {
+        let text = categoryNameTextFiled.text
         dismiss(animated: true) {
             print("New Category - \(String(describing: self.newCategoryName))")
-            
+            self.delegate?.setCategory(category: text)
             
           //  self.delegate?.setCategory(category: self.newCategoryName)
-            self.disableDoneButton()
-            self.newCategoryName = nil
-            self.categoryNameTextFiled.text = nil
+//            self.disableDoneButton()
+//            self.newCategoryName = nil
+//            self.categoryNameTextFiled.text = nil
         }
     }
 }

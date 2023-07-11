@@ -7,6 +7,11 @@
 
 import UIKit
 
+enum TrackerType {
+    case regular
+    case irregular
+}
+
 final class TrackerTypeViewController: UIViewController {
     
     weak var delegate: TrackerStoreProtocol?
@@ -42,7 +47,7 @@ final class TrackerTypeViewController: UIViewController {
         button.setTitle("Нерегулярные событие", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-       // button.addTarget(self, action: #selector(addNewTracker), for: .touchUpInside)
+        button.addTarget(self, action: #selector(irregularButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -77,10 +82,17 @@ final class TrackerTypeViewController: UIViewController {
             stackView.heightAnchor.constraint(equalToConstant: 135)
         ])
     }
+    @objc func irregularButtonClicked() {
+        let vc = TrackerCreationViewController()
+        vc.trackerType = .irregular
+        vc.trackerStore = self
+        present(vc, animated: true)
+    }
     
     @objc
     func regularButtonClicked() {
         let vc = TrackerCreationViewController()
+        vc.trackerType = .regular
         vc.trackerStore = self
         present(vc, animated: true)
     }

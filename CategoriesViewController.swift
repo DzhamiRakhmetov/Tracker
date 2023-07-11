@@ -7,8 +7,14 @@
 
 import UIKit
 
+protocol CategoriesViewControllerDelegate: AnyObject {
+    func selectCategory(_ string: String)
+}
+
 final class CategoriesViewController: UIViewController {
+    weak var delegate: CategoriesViewControllerDelegate?
     
+    private var categories = TrackerCategoryStore()
     private lazy var header: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -95,21 +101,23 @@ final class CategoriesViewController: UIViewController {
     @objc
     func doneButtonClicked() {
         let newCategoryViewController = NewCategoryViewController()
+        newCategoryViewController.delegate = self
         present(newCategoryViewController, animated: true)
     }
 }
 
 extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return categories.numberOfCategories
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {return UITableViewCell()}
-        
+        let value = categories.fetchCategoryName(index: indexPath.row)
         
         cell.contentView.backgroundColor = .custom.backgroundDay
-        cell.label.text = "Категория 1"
+        cell.label.text = value
         return cell
     }
     
@@ -119,7 +127,21 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        guard let value = categories.fetchCategoryName(index: indexPath.row) else { return }
+        dismiss(animated: true) {
+            self.delegate?.selectCategory(value)
+        }
     }
 }
 
 
+
+
+extension CategoriesViewController: NewCategoryViewControllerDelegate {
+    func setCategory(category: String?) {
+        guard let category = category else { return }
+        categories.addCategory(category: category)
+        categories = TrackerCategoryStore()
+        categoriesTableView.reloadData()
+    }
+}

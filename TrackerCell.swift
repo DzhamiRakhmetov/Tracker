@@ -99,13 +99,14 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     
-    func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, selectedDate: Date, indexPath: IndexPath) {
+    func configure(with tracker: TrackerCoreData, isCompletedToday: Bool, completedDays: Int, selectedDate: Date, indexPath: IndexPath) {
         self.trackerId = tracker.id
         self.isCompletedToday = isCompletedToday
         self.selectedDate = selectedDate
         self.indexPath = indexPath
         
-        let color = tracker.color
+        let textColor = tracker.color ?? "#FFFFFF"
+        let color = UIColorMarshalling.deserialize(hexString: textColor)
         setUpConstraints()
         
         trackerView.backgroundColor = color

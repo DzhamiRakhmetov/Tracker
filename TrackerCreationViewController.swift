@@ -15,14 +15,17 @@ final class TrackerCreationViewController: UIViewController {
     
     var dataForTableView = ["Категория", "Расписание"]
     var trackerStore: TrackerStoreProtocol?
+    var trackerType: TrackerType?
     
     private var selectedTrackerName: String?
     private var selectedCategory: String?
     private var selectedSchedule: [WeekDay] = []
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
+    private var scheduleSubTitle: String = ""
     
     private let emojies: [String] = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
+    private lazy var buttonsTableViewHeight: CGFloat = 150
     
     private let colors: [UIColor] = SelectionColor.allCases.compactMap({UIColor(named: $0.rawValue)})
     
@@ -31,8 +34,6 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     lazy var trackersViewController = TrackersViewController()
-   
-    lazy var categoriesViewController = CategoriesViewController()
     
     private lazy var contentView: UIView = {
         let contentView = UIView()
@@ -52,11 +53,16 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Новая привычка"
+        if trackerType == .regular {
+            label.text = "Новая привычка"
+        } else {
+            label.text = "Новое нерегулярное действие"
+        }
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
     }()
+    
     
     private lazy var trackerTextFiled: UITextField = {
         let textFiled = UITextField()
@@ -93,6 +99,14 @@ final class TrackerCreationViewController: UIViewController {
         label.font = UIFont.boldSystemFont(ofSize: 16)
         return label
     }()
+    
+//    private lazy var scheduleButtonSubTitle: UILabel = {
+//         let label = UILabel()
+//         label.text = scheduleSubTitle
+//         label.font = .systemFont(ofSize: 16)
+//         label.translatesAutoresizingMaskIntoConstraints = false
+//         return label
+//     }()
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -185,8 +199,8 @@ final class TrackerCreationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .custom.white
+        setUpViewController()
         setUpConstraints()
-        
     }
     
     
@@ -218,7 +232,7 @@ final class TrackerCreationViewController: UIViewController {
             buttonsTableView.topAnchor.constraint(equalTo: trackerTextFiled.bottomAnchor, constant: 24),
             buttonsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             buttonsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            buttonsTableView.heightAnchor.constraint(equalToConstant: 150),
+            buttonsTableView.heightAnchor.constraint(equalToConstant: buttonsTableViewHeight),
             
             emojiLabel.topAnchor.constraint(equalTo: buttonsTableView.bottomAnchor, constant: 32),
             emojiLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
@@ -249,27 +263,38 @@ final class TrackerCreationViewController: UIViewController {
         ])
     }
     
+    private func setUpViewController() {
+        if trackerType == .irregular {
+            selectedSchedule = []
+            buttonsTableViewHeight = 75
+            buttonsTableView.separatorStyle = .none
+        }
+    }
     
     private func tapScheduleCell(){
-        lazy var scheduleViewController = ScheduleViewController()
+        let scheduleViewController = ScheduleViewController()
         scheduleViewController.delegate = self
         present(scheduleViewController, animated: true)
     }
     
     private func tapCategoriesCell(){
-         lazy var newCategoryViewController = NewCategoryViewController()
-        newCategoryViewController.delegate = self
-        present(categoriesViewController, animated: true)
+        let vc = CategoriesViewController()
+        vc.delegate = self
+        present(vc, animated: true)
     }
     
     
     private func setScheduleButtonSubTitle(with additionalText: String?) {
         let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? ButtonCell
-        if let additionalText = additionalText {
-            scheduleButtonSubTitile?.set(additionalText: additionalText)
-        } else {
-            return
-        }
+//        if let additionalText = additionalText {
+//            scheduleButtonSubTitile?.set(additionalText: additionalText)
+//           // scheduleButtonSubTitile?.set(label: "Распиание", additionalText: additionalText)
+//        } else {
+//            //scheduleButtonSubTitile?.set(label: "Распиание")
+//            return
+//        }
+
+        scheduleButtonSubTitile?.setup(selectedCategory)
     }
     
 //    private func showCharactersLimitLabel(){
@@ -277,9 +302,12 @@ final class TrackerCreationViewController: UIViewController {
 //
 //    }
         @objc func createAction() {
-      //  guard let selectedCategory = selectedCategory else {return}
+        guard let selectedCategory = selectedCategory else {
+            //TODO: alert
+            return
+        }
+            
         let newTracker = Tracker(
-            id: UUID(),
             name: trackerTextFiled.text ?? "",
             color: selectedColor ?? .custom.black,
             emoji: selectedEmoji ?? "",
@@ -288,7 +316,7 @@ final class TrackerCreationViewController: UIViewController {
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
         dismiss(animated: true) {
-            self.trackerStore?.createTracker(newTracker, categoryName: "Категория 1")
+            self.trackerStore?.createTracker(newTracker, categoryName: selectedCategory)
         }
     }
     
@@ -335,7 +363,14 @@ extension TrackerCreationViewController: UITableViewDelegate {
 
 extension TrackerCreationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataForTableView.count
+      //  return dataForTableView.count
+        switch trackerType {
+        case .regular:
+            return 2
+        case .irregular:
+            return 1
+        default: preconditionFailure("Error: Trecker Type")
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -343,22 +378,25 @@ extension TrackerCreationViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         cell.accessoryType = .disclosureIndicator
-        cell.textLabel?.text = dataForTableView[indexPath.row]
+        cell.label.text = dataForTableView[indexPath.row]
         cell.backgroundColor = .custom.backgroundDay
+
         if indexPath.row == 0 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            cell.setup(selectedCategory)
         } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+            let string = selectedSchedule.map({$0.shortStyle}).joined(separator: ", ")
+          //  cell.set(label: "Расписание")
+            cell.setup(string)
         }
         return cell
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
-    }
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 11
+//    }
 }
 
-// MARK: - CollectionView Extenstion
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 
 extension TrackerCreationViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -405,6 +443,10 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
     }
 }
 
+
+
+// MARK: - TrackerCreationViewController Extension
+
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
     func createSchedule(schedule: [WeekDay]) {
         self.selectedSchedule = schedule
@@ -414,9 +456,10 @@ extension TrackerCreationViewController: ScheduleViewControllerDelegate {
         buttonsTableView.reloadData()
     }
 }
-//
-//extension TrackerCreationViewController: NewCategoryViewControllerDelegate {
-//    func setCategory(category: String?) {
-//        category = self.selectedCategory
-//    }
-//}
+
+extension TrackerCreationViewController: CategoriesViewControllerDelegate {
+    func selectCategory(_ string: String) {
+        self.selectedCategory = string
+        self.buttonsTableView.reloadData()
+    }
+}

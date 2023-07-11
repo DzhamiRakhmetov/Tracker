@@ -9,7 +9,7 @@ import UIKit
 
 final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
-    var categories = [TrackerCategory]()
+    var categories = TrackerCategoryStore()
     var completedTrackers = [TrackerRecord]()
     var visibleCategories = [TrackerCategory]()
     private let dataManager = DataManager.shared
@@ -110,6 +110,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let array = TrackerStore().fetchResultController
+        
+        print(array)
+        
+        
         view.backgroundColor = .custom.white
         setUpConstraints()
         reloadData()
@@ -151,7 +156,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private func reloadData() {
-        categories = dataManager.categories
+        categories = TrackerCategoryStore()
         dateChanged(datePicker)
     }
   
@@ -162,31 +167,31 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         let selectWeekday = WeekDay(rawValue: filterWeekDay)
         let filterText = (text ?? "").lowercased()
-        
-        visibleCategories = categories.compactMap { category in
-            
-            let trackers = category.trackers.filter { tracker in
-                //1
-                let textCondition = filterText.isEmpty ||
-                tracker.name.lowercased().contains(filterText)
-                
-                //2
-                guard let selectWeekday = selectWeekday  else {return textCondition }
-                
-                //3
-                let schedule = tracker.schedule.contains { value in
-                    value == selectWeekday
-                }
-                
-                return textCondition && schedule
-            }
-            
-            if trackers.isEmpty {
-                return nil
-            }
-            
-            return TrackerCategory(title: category.title, trackers: trackers)
-        }
+//
+//        visibleCategories = categories.compactMap { category in
+//
+//            let trackers = category.trackers.filter { tracker in
+//                //1
+//                let textCondition = filterText.isEmpty ||
+//                tracker.name.lowercased().contains(filterText)
+//
+//                //2
+//                guard let selectWeekday = selectWeekday  else {return textCondition }
+//
+//                //3
+//                let schedule = tracker.schedule.contains { value in
+//                    value == selectWeekday
+//                }
+//
+//                return textCondition && schedule
+//            }
+//
+//            if trackers.isEmpty {
+//                return nil
+//            }
+//
+//            return TrackerCategory(title: category.title, trackers: trackers)
+//        }
         
         collectionView.reloadData()
     }
@@ -238,25 +243,32 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let tracker = visibleCategories[section].trackers
-        return tracker.count
+//        let tracker = visibleCategories[section].trackers
+//        return tracker.count
+        let count = categories.numberOfRowsInSection(section: section)
+        return count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         print("numberOfSections - \(visibleCategories.count)")
-        let count = visibleCategories.count
-        isHiddenPlacholder = count > 0
+//        let count = visibleCategories.count
+//        isHiddenPlacholder = count > 0
+//        return count
+        print(categories)
+        
+        let count = categories.numberOfCategories
         return count
     }
     
     
     fileprivate func setupCell(_ indexPath: IndexPath, _ cell: TrackerCell) {
         
-        let cellData = visibleCategories
-        let tracker = cellData[indexPath.section].trackers[indexPath.row]
+//        let cellData = categories.trackersInSection(section: indexPath.section)
+//        let tracker = cellData[indexPath.section].trackers[indexPath.row]
+        let tracker = categories.trackersInSection(section: indexPath.section)[indexPath.row]
         cell.delegate = self
-        
-        let isCompletedToday = isTrackerCompletedToday(id: tracker.id)
+        guard let id = tracker.id else { return }
+        let isCompletedToday = isTrackerCompletedToday(id: id)
         let completedDays = completedTrackers.filter { $0.id == tracker.id}.count
         cell.configure(
             with: tracker,
@@ -285,7 +297,8 @@ extension TrackersViewController: UICollectionViewDataSource {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderSectionView", for: indexPath) as? HeaderSectionView
         else {return UICollectionReusableView()}
         
-        let titileCategory = visibleCategories[indexPath.section].title
+//        let titileCategory = visibleCategories[indexPath.section].title
+        let titileCategory = categories.fetchCategoryName(index: indexPath.section) ?? "---"
         view.setTitle(text: titileCategory)
         return view
     }
@@ -338,7 +351,8 @@ extension TrackersViewController: TrackerStoreProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
 //        categories.append(.init(title: categoryName, trackers: [tracker]))
 //        collectionView.reloadData()
-        dataManager.categories.append(.init(title: categoryName, trackers: [tracker]))
+        let db = TrackerStore()
+        db.add(category: categoryName, tracker)
         reloadData()
         collectionView.reloadData()
         print(tracker)

@@ -7,16 +7,20 @@
 
 import UIKit
 
- class ButtonCell: UITableViewCell {
+class ButtonCell: UITableViewCell {
     
     lazy var label: UILabel = {
         let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 17)
-        
         return label
     }()
-     
+    
+    private lazy var descriptionlLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 13)
+        return label
+    }()
+    
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -28,27 +32,65 @@ import UIKit
     }
     
     func setuUpViews() {
-        contentView.addSubview(label)
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .equalSpacing
+        stackView.alignment = .fill
+        stackView.spacing = 10
+        stackView.addArrangedSubview(label)
+        stackView.addArrangedSubview(descriptionlLabel)
+        contentView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            label.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            ])
+            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+        ])
     }
-     
-     func set(additionalText: String?) {
-         if let additionalText = additionalText {
-             let paragraphStyle = NSMutableParagraphStyle()
-             paragraphStyle.lineSpacing = 2
-             let additionalTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.backgroundDay]
-             let additionalAttributedString = NSMutableAttributedString(string: additionalText, attributes: additionalTextAttributes)
-             additionalAttributedString.addAttribute(NSAttributedString.Key.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: additionalAttributedString.length))
-             label.numberOfLines = 1
-             label.attributedText = additionalAttributedString
-         } else {
-             label.text = nil
-         }
-     }
+    
+    // TODO: - additional Text
+    
+    func set( additionalText: String? = nil) {
 
+        if let additionalText = additionalText {
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = 2
+            let labelAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.backgroundDay]
+            let additionalTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.lightGray]
+            let labelText = NSMutableAttributedString(string: label.text ?? "", attributes: labelAttributes)
+            let emptyString = NSAttributedString(string: "\n", attributes: labelAttributes);
+
+            let additionalText = NSMutableAttributedString(string: "\n\(additionalText)", attributes: additionalTextAttributes)
+            labelText.append(emptyString)
+            labelText.append(additionalText)
+            label.numberOfLines = 3
+            label.attributedText = labelText
+        } else {
+            label.text = label.text
+        }
+    }
+    
+    func setup(_ deteal: String?) {
+        descriptionlLabel.text = deteal
+    }
+    
+//    func set(label text: String, additionalText: String? = nil) {
+//            if let additionalText = additionalText {
+//                let paragraphStyle = NSMutableParagraphStyle()
+//                paragraphStyle.lineSpacing = 2
+//                let labelAttributes = [NSAttributedString.Key.foregroundColor : UIColor.custom.backgroundDay
+//                                       NSAttributedString.Key.paragraphStyle : paragraphStyle]
+//                let additionalTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.custom.backgroundDay]
+//                let labelText = NSMutableAttributedString(string: text, attributes: labelAttributes)
+//                let additionalText = NSMutableAttributedString(string: "\n\(additionalText)",
+//                                                               attributes: additionalTextAttributes)
+//                labelText.append(additionalText)
+//                label.numberOfLines = 2
+//                label.attributedText = labelText
+//            } else {
+//                label.text = text
+//            }
+//        }
 }
