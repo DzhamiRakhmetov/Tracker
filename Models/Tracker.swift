@@ -8,11 +8,12 @@
 import UIKit
 
 struct Tracker {
-    let id: UUID = UUID()
+    let id: UUID 
     let name: String
     let color: UIColor
     let emoji: String
-    let schedule:[WeekDay]
+  //  let schedule: [WeekDay]
+    let schedule: [Int]
 }
 
 struct Schedule {
@@ -20,7 +21,7 @@ struct Schedule {
     let isOn: Bool
 }
 
-enum WeekDay: Int, CaseIterable, Codable {
+enum WeekDay: Int, CaseIterable {
     case monday = 2
     case tuesday = 3
     case wednesday = 4

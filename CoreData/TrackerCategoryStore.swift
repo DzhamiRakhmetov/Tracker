@@ -11,7 +11,7 @@ import CoreData
 // MARK: - TrackerCategoryStoreProtocol
 
 protocol TrackerCategoryStoreProtocol {
-    func addCategory(category: String)
+    func addCategory(category: String) throws
     func fetchNewCategoryName(name: String) -> TrackerCategoryCoreData? 
 }
 
@@ -58,22 +58,10 @@ class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
         return trackers.count
     }
     
-    func trackersInSection(section: Int) -> [Tracker] {
-        
-        guard let category = fetchResultController.fetchedObjects?[section] else { return []}
-        guard let trackers = category.trackers else { return []}
-        print(trackers)
-        
-        guard let value = Array(trackers) as? [ TrackerCoreData ] else {
-            return []
-        }
-        
-        print(value)
-        return []
-    }
-    
-    func addCategory(category: String) {
+  
+    func addCategory(category: String) throws {
         guard let categories = fetchResultController.fetchedObjects else {return}
+        
         
         // проверка существования категории
         for cat in categories {
@@ -81,18 +69,23 @@ class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
                 return
             }
         }
-        
         let cat = TrackerCategoryCoreData(context: context)
         cat.title = category
         
-        try! context.save()
+        try context.save()
     }
     
-    func deleteCategory(at indexPath: IndexPath) {
+    func deleteCategory(at indexPath: IndexPath) throws {
         let category = fetchResultController.object(at: indexPath)
         context.delete(category)
-        try! context.save()
+        try context.save()
     }
+    
+    func getCategoriesNames() -> [String] {
+           guard let allCategoriesNames =  fetchResultController.fetchedObjects else { return [] }
+           
+           return allCategoriesNames.map { $0.title ?? "" }
+       }
     
     func fetchCategoryName(index: Int) -> String? {
         guard let category  = fetchResultController.fetchedObjects?[index] else {return nil}
