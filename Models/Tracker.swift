@@ -14,7 +14,7 @@ struct Tracker {
     let emoji: String
 //    let schedule: [WeekDay]
     let schedule: [Int]
-
+    // look at  1) OptionalSet 2) Transformer
 }
 
 struct Schedule {
@@ -23,22 +23,22 @@ struct Schedule {
 }
 
 
-enum WeekDay: String, CaseIterable {
-//    case monday = 2
-//    case tuesday = 3
-//    case wednesday = 4
-//    case thursday = 5
-//    case friday = 6
-//    case saturday = 7
-//    case sunday = 1
+enum WeekDay: Int, CaseIterable {
+    case monday = 2
+    case tuesday = 3
+    case wednesday = 4
+    case thursday = 5
+    case friday = 6
+    case saturday = 7
+    case sunday = 1
     
-    case monday
-    case tuesday
-    case wednesday
-    case thursday
-    case friday
-    case saturday
-    case sunday
+//    case monday
+//    case tuesday
+//    case wednesday
+//    case thursday
+//    case friday
+//    case saturday
+//    case sunday
     
     
     var value: String {
