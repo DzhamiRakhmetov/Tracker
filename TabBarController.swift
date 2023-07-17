@@ -16,7 +16,7 @@ final class TabBarController: UITabBarController {
     
     private func prepareTabBar() {
         viewControllers = [
-         prepareVC(viewController: TrackersViewController(), title: "Трекеры", image: UIImage(named: "CircleIcon")),
+            prepareVC(viewController: TrackersViewController(), title: "Трекеры", image: UIImage(named: "CircleIcon")),
          prepareVC(viewController: StatisticsViewController(), title: "Статистика", image: UIImage(named: "RabbitIcon"))
     ]}
     

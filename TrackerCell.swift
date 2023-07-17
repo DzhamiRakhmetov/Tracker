@@ -9,6 +9,7 @@ import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool)
+  //  func deleteTracker(at indexPath: IndexPath)
 }
 
 final class TrackerCell: UICollectionViewCell {
@@ -74,6 +75,7 @@ final class TrackerCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        addContextMenuInteraction()
     }
     
     required init?(coder: NSCoder) {
@@ -100,7 +102,7 @@ final class TrackerCell: UICollectionViewCell {
     
     
     func configure(with tracker: TrackerCoreData, isCompletedToday: Bool, completedDays: Int, selectedDate: Date, indexPath: IndexPath) {
-        self.trackerId = tracker.id
+        trackerId = tracker.id
         self.isCompletedToday = isCompletedToday
         self.selectedDate = selectedDate
         self.indexPath = indexPath
@@ -178,7 +180,37 @@ final class TrackerCell: UICollectionViewCell {
             assertionFailure("no trackerID")
             return
         }
-            dayCounterButton.isEnabled = true
-            delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+        dayCounterButton.isEnabled = true
+        delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+    }
+}
+
+// MARK: - Extensions
+
+extension TrackerCell: UIContextMenuInteractionDelegate {
+    
+    func addContextMenuInteraction() {
+        let interaction = UIContextMenuInteraction(delegate: self)
+        trackerView.addInteraction(interaction)
+    }
+    
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let deleteImage = UIImage(systemName: "trash")
+        let editImage = UIImage(systemName: "square.and.pencil")
+        
+        return UIContextMenuConfiguration(actionProvider: { actions in
+            return UIMenu(children: [
+                UIAction(title: "Редактировать", image: editImage) { [weak self] _ in
+                    guard let self = self else { return }
+                    //   self.editTracker(cell: self)
+                },
+                UIAction(title: "Удалить", image: deleteImage, attributes: .destructive) { [weak self] _ in
+                    guard let self = self else { return }
+                   // let indexPath = trackerView.index(ofAccessibilityElement: TrackerCell)
+                    
+                }
+            ])
+        })
     }
 }

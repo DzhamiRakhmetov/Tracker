@@ -9,6 +9,7 @@ import UIKit
 
 protocol TrackerStoreProtocol: AnyObject {
     func createTracker(_ tracker: Tracker, categoryName: String)
+   
 }
 
 final class TrackerCreationViewController: UIViewController {
@@ -286,14 +287,6 @@ final class TrackerCreationViewController: UIViewController {
     
     private func setScheduleButtonSubTitle(with additionalText: String?) {
         let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? ButtonCell
-//        if let additionalText = additionalText {
-//            scheduleButtonSubTitile?.set(additionalText: additionalText)
-//           // scheduleButtonSubTitile?.set(label: "Распиание", additionalText: additionalText)
-//        } else {
-//            //scheduleButtonSubTitile?.set(label: "Распиание")
-//            return
-//        }
-
         scheduleButtonSubTitile?.setup(selectedCategory)
     }
     
@@ -308,10 +301,11 @@ final class TrackerCreationViewController: UIViewController {
         }
             
         let newTracker = Tracker(
+            id: UUID(), //!!!!!
             name: trackerTextFiled.text ?? "",
             color: selectedColor ?? .custom.black,
             emoji: selectedEmoji ?? "",
-            schedule: selectedSchedule)
+            schedule: [1]) // !!!!! selectedSchedule)
         
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
@@ -385,15 +379,11 @@ extension TrackerCreationViewController: UITableViewDataSource {
             cell.setup(selectedCategory)
         } else {
             let string = selectedSchedule.map({$0.shortStyle}).joined(separator: ", ")
-          //  cell.set(label: "Расписание")
+           
             cell.setup(string)
         }
         return cell
     }
-    
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return 11
-//    }
 }
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegateFlowLayout

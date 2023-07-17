@@ -5,23 +5,20 @@
 //  Created by Dzhami on 03.07.2023.
 //
 
-import Foundation
 import CoreData
 import UIKit
 
-//extension NSFetchRequestResult {
-//    static var identifier: String { return String(describing: Self.self)}
-//}
+
 
 // MARK: - TrackerStore Class
 
 class TrackerStore: NSObject {
-    private var context: NSManagedObjectContext { return databaseManager.context}
-    private let databaseManager = DatabaseManager.shared
+    private var context: NSManagedObjectContext { databaseManager.context}
+    private let databaseManager = DatabaseManager.shared // !!!!!
     
     lazy var fetchResultController: NSFetchedResultsController<TrackerCoreData> = {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerCoreData.category?.title, ascending: true)]
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData") //!!!!!
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerCoreData.category?.title, ascending: false)]
         
         let fetchResultController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -35,9 +32,15 @@ class TrackerStore: NSObject {
         return fetchResultController
     }()
     
+   
+    
     // add tracker
-    func addTracker(tracker: Tracker, in category : String ) throws {
-        guard let category = TrackerCategoryStore().fetchNewCategoryName(name: category) else { return }
+    func addTracker(tracker: Tracker, in category: String) throws {
+        guard
+            let category = TrackerCategoryStore(context: context)
+                .fetchCategory(with: category)
+        else { return }
+        // do not create new object of TrackerCategoryStore !!!!!
         
         let trackerDB = TrackerCoreData(context: context)
         
@@ -58,10 +61,26 @@ class TrackerStore: NSObject {
     func deleteTracker(at indexPath: IndexPath) throws {
         let trackerCoreData = fetchResultController.object(at: indexPath)
         context.delete(trackerCoreData)
-        try context.save()
+        do {
+            try context.save()
+        } catch let error {
+            print(error.localizedDescription)
+        }
     }
     
-    private func makeTracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
+    // add func to get all trackers or specific tracker
+    
+    func getTrackerAt(indexPath: IndexPath) -> Tracker? {
+           let trackerCoreData = fetchResultController.object(at: indexPath)
+           do {
+               let tracker = try makeTracker(from: trackerCoreData)
+               return tracker
+           } catch {
+               return nil
+           }
+       }
+    
+    func makeTracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id else {
             throw TrackerStoreError.invalidTrackerID
         }

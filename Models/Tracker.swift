@@ -12,8 +12,9 @@ struct Tracker {
     let name: String
     let color: UIColor
     let emoji: String
-  //  let schedule: [WeekDay]
+//    let schedule: [WeekDay]
     let schedule: [Int]
+
 }
 
 struct Schedule {
@@ -21,14 +22,24 @@ struct Schedule {
     let isOn: Bool
 }
 
-enum WeekDay: Int, CaseIterable {
-    case monday = 2
-    case tuesday = 3
-    case wednesday = 4
-    case thursday = 5
-    case friday = 6
-    case saturday = 7
-    case sunday = 1
+
+enum WeekDay: String, CaseIterable {
+//    case monday = 2
+//    case tuesday = 3
+//    case wednesday = 4
+//    case thursday = 5
+//    case friday = 6
+//    case saturday = 7
+//    case sunday = 1
+    
+    case monday
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
+    case sunday
+    
     
     var value: String {
         switch self {
@@ -48,8 +59,8 @@ enum WeekDay: Int, CaseIterable {
             return "Воскресенье"
         }
     }
-    
-    
+
+
     var shortStyle: String {
         switch self {
         case .monday:

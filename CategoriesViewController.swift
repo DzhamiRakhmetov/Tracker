@@ -140,7 +140,11 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
 extension CategoriesViewController: NewCategoryViewControllerDelegate {
     func setCategory(category: String?) {
         guard let category = category else { return }
-        categories.addCategory(category: category)
+        do {
+            try categories.addCategory(category: category)
+        } catch let error {
+            print(error.localizedDescription)
+        }
         categories = TrackerCategoryStore()
         categoriesTableView.reloadData()
     }
