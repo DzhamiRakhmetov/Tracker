@@ -12,9 +12,8 @@ struct Tracker {
     let name: String
     let color: UIColor
     let emoji: String
-//    let schedule: [WeekDay]
-    let schedule: [Int]
-    // look at  1) OptionalSet 2) Transformer
+ //   let schedule: [WeekDay]
+    let schedule: [Int]?
 }
 
 struct Schedule {
@@ -23,22 +22,14 @@ struct Schedule {
 }
 
 
-enum WeekDay: Int, CaseIterable {
-    case monday = 2
-    case tuesday = 3
-    case wednesday = 4
-    case thursday = 5
-    case friday = 6
-    case saturday = 7
-    case sunday = 1
-    
-//    case monday
-//    case tuesday
-//    case wednesday
-//    case thursday
-//    case friday
-//    case saturday
-//    case sunday
+enum WeekDay: String, CaseIterable {
+    case monday
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
+    case sunday
     
     
     var value: String {
@@ -77,6 +68,59 @@ enum WeekDay: Int, CaseIterable {
             return "Сб"
         case .sunday:
             return "Вс"
+        }
+    }
+}
+
+final class ScheduleService {
+    
+    func arrayToString(array: [Int]) -> String {
+        let sortedDays = array.sorted()
+        let shortNames = sortedDays.map { changeDayToShortName(day: $0) }
+        let finalString = shortNames.joined(separator: ", ")
+
+        return finalString
+    }
+    
+    func addDayToSchedule(day: String) -> Int {
+        switch day {
+        case "Понедельник":
+            return 1
+        case "Вторник":
+            return 2
+        case "Среда":
+            return 3
+        case "Четверг":
+            return 4
+        case "Пятница":
+            return 5
+        case "Суббота":
+            return 6
+        case "Воскресенье":
+            return 7
+        default:
+            return 0
+        }
+    }
+    
+    func changeDayToShortName(day: Int) -> String {
+        switch day {
+        case 1:
+            return "Пн" 
+        case 2:
+            return "Вт"
+        case 3:
+            return "Ср"
+        case 4:
+            return "Чт"
+        case 5:
+            return "Пт"
+        case 6:
+            return "Cб"
+        case 7:
+            return "Вс"
+        default:
+            return ""
         }
     }
 }

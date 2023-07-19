@@ -8,13 +8,15 @@
 import UIKit
 
 protocol ScheduleViewControllerDelegate: AnyObject {
-    func createSchedule (schedule: [WeekDay])
+//    func createSchedule (schedule: [WeekDay])
+    func createSchedule (schedule: [Int])
 }
 
 final class ScheduleViewController: UIViewController {
     
     weak var delegate: ScheduleViewControllerDelegate?
-    var selectedSchedule: [WeekDay] = []
+//    var selectedSchedule: [WeekDay] = []
+    var selectedSchedule: [Int] = []
     
     private lazy var headerTitile: UILabel = {
         let label = UILabel()
@@ -86,15 +88,17 @@ final class ScheduleViewController: UIViewController {
 //    }
     
     private func switchStatus() {
-        for (index, weekDay) in WeekDay.allCases.enumerated() {
+        for (index, _) in WeekDay.allCases.enumerated() {
             let indexPath = IndexPath(row: index, section: 0)
             let cell = scheduleTableView.cellForRow(at: indexPath)
             guard let switchView = cell?.accessoryView as? UISwitch else {return}
-            
+
             if switchView.isOn {
-                selectedSchedule.append(weekDay)
+//                selectedSchedule.append(weekDay)
+                selectedSchedule.append(index + 1)
             } else {
-                selectedSchedule.removeAll { $0 == weekDay }
+//                selectedSchedule.removeAll { $0 == weekDay }
+                selectedSchedule.removeAll { $0 == index }
             }
             //setDoneButton()
         }

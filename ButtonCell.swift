@@ -52,45 +52,27 @@ class ButtonCell: UITableViewCell {
     
     // TODO: - additional Text
     
-    func set( additionalText: String? = nil) {
-
-        if let additionalText = additionalText {
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.lineSpacing = 2
-            let labelAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.backgroundDay]
-            let additionalTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.lightGray]
-            let labelText = NSMutableAttributedString(string: label.text ?? "", attributes: labelAttributes)
-            let emptyString = NSAttributedString(string: "\n", attributes: labelAttributes);
-
-            let additionalText = NSMutableAttributedString(string: "\n\(additionalText)", attributes: additionalTextAttributes)
-            labelText.append(emptyString)
-            labelText.append(additionalText)
-            label.numberOfLines = 3
-            label.attributedText = labelText
-        } else {
-            label.text = label.text
-        }
-    }
-    
-    func setup(_ deteal: String?) {
-        descriptionlLabel.text = deteal
-    }
-    
-//    func set(label text: String, additionalText: String? = nil) {
-//            if let additionalText = additionalText {
-//                let paragraphStyle = NSMutableParagraphStyle()
-//                paragraphStyle.lineSpacing = 2
-//                let labelAttributes = [NSAttributedString.Key.foregroundColor : UIColor.custom.backgroundDay
-//                                       NSAttributedString.Key.paragraphStyle : paragraphStyle]
-//                let additionalTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.custom.backgroundDay]
-//                let labelText = NSMutableAttributedString(string: text, attributes: labelAttributes)
-//                let additionalText = NSMutableAttributedString(string: "\n\(additionalText)",
-//                                                               attributes: additionalTextAttributes)
-//                labelText.append(additionalText)
-//                label.numberOfLines = 2
-//                label.attributedText = labelText
-//            } else {
-//                label.text = text
-//            }
+//    func set( additionalText: String? = nil) {
+//
+//        if let additionalText = additionalText {
+//            let paragraphStyle = NSMutableParagraphStyle()
+//            paragraphStyle.lineSpacing = 2
+//            let labelAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.backgroundDay]
+//            let additionalTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.lightGray]
+//            let labelText = NSMutableAttributedString(string: label.text ?? "", attributes: labelAttributes)
+//            let emptyString = NSAttributedString(string: "\n", attributes: labelAttributes);
+//
+//            let additionalText = NSMutableAttributedString(string: "\n\(additionalText)", attributes: additionalTextAttributes)
+//            labelText.append(emptyString)
+//            labelText.append(additionalText)
+//            label.numberOfLines = 3
+//            label.attributedText = labelText
+//        } else {
+//            label.text = label.text
 //        }
+//    }
+    
+    func setup(_ detail: String?) {
+        descriptionlLabel.text = detail
+    }
 }

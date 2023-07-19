@@ -48,7 +48,7 @@ class TrackerStore: NSObject {
         trackerDB.name = tracker.name
         trackerDB.color = UIColorMarshalling.serialize(color: tracker.color)
         trackerDB.emoji = tracker.emoji
-        trackerDB.schedule = tracker.schedule
+        trackerDB.schedule = tracker.schedule ?? [] //.map { String($0) }.joined(separator: ",")
         trackerDB.category = category
         
         do {
@@ -66,6 +66,28 @@ class TrackerStore: NSObject {
         } catch let error {
             print(error.localizedDescription)
         }
+    }
+    
+    func fetchTrackers() -> [TrackerCategory] {
+        guard let sections = fetchResultController.sections else { return [] }
+
+        var currentCategory: [TrackerCategory] = []
+
+        for section in sections {
+            guard let object = section.objects as? [TrackerCoreData] else { return [] }
+            var category = TrackerCategory(title: section.name, trackers: [] )
+
+            for tracker in object {
+                category.trackers.append(Tracker(id: tracker.id ?? UUID(),
+                                                     name: tracker.name ?? "",
+                                                     color: UIColorMarshalling.deserialize(hexString: tracker.color ?? "")!,
+                                                     emoji: tracker.emoji ?? "",
+                                                     schedule: tracker.schedule))
+            }
+            currentCategory.append(category)
+        }
+
+        return currentCategory
     }
     
     // add func to get all trackers or specific tracker
@@ -96,7 +118,7 @@ class TrackerStore: NSObject {
         guard let emoji = trackerCoreData.emoji else {
             throw TrackerStoreError.invalidTrackerEmoji
         }
-        guard let schedule = trackerCoreData.schedule else {
+        guard let schedule = trackerCoreData.schedule  else {
             throw TrackerStoreError.invalidTrackerScheduleInt
         }
         return Tracker(id: id,
@@ -109,7 +131,10 @@ class TrackerStore: NSObject {
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
-    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        self.fetchTrackers()
+        
+    }
 }
 
 

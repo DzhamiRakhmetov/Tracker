@@ -9,7 +9,7 @@ import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool)
-  //  func deleteTracker(at indexPath: IndexPath)
+    func deleteTracker(at indexPath: IndexPath)
 }
 
 final class TrackerCell: UICollectionViewCell {
@@ -206,8 +206,8 @@ extension TrackerCell: UIContextMenuInteractionDelegate {
                     //   self.editTracker(cell: self)
                 },
                 UIAction(title: "Удалить", image: deleteImage, attributes: .destructive) { [weak self] _ in
-                    guard let self = self else { return }
-                   // let indexPath = trackerView.index(ofAccessibilityElement: TrackerCell)
+                    guard let self = self, let indexPath = indexPath else { return }
+                    delegate?.deleteTracker(at: indexPath)
                     
                 }
             ])

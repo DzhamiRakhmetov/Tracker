@@ -17,10 +17,12 @@ final class TrackerCreationViewController: UIViewController {
     var dataForTableView = ["Категория", "Расписание"]
     var trackerStore: TrackerStoreProtocol?
     var trackerType: TrackerType?
+    let scheduleService = ScheduleService()
     
     private var selectedTrackerName: String?
     private var selectedCategory: String?
-    private var selectedSchedule: [WeekDay] = []
+//    private var selectedSchedule: [WeekDay] = []
+    private var selectedSchedule: [Int] = []
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
     private var scheduleSubTitle: String = ""
@@ -287,7 +289,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private func setScheduleButtonSubTitle(with additionalText: String?) {
         let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? ButtonCell
-        scheduleButtonSubTitile?.setup(selectedCategory)
+        scheduleButtonSubTitile?.setup(additionalText)
     }
     
 //    private func showCharactersLimitLabel(){
@@ -305,7 +307,7 @@ final class TrackerCreationViewController: UIViewController {
             name: trackerTextFiled.text ?? "",
             color: selectedColor ?? .custom.black,
             emoji: selectedEmoji ?? "",
-            schedule: [1]) // !!!!! selectedSchedule)
+            schedule: selectedSchedule)
         
         print("\(newTracker)")
         print("selected schedule - \(selectedSchedule)")
@@ -357,7 +359,6 @@ extension TrackerCreationViewController: UITableViewDelegate {
 
 extension TrackerCreationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      //  return dataForTableView.count
         switch trackerType {
         case .regular:
             return 2
@@ -378,8 +379,7 @@ extension TrackerCreationViewController: UITableViewDataSource {
         if indexPath.row == 0 {
             cell.setup(selectedCategory)
         } else {
-            let string = selectedSchedule.map({$0.shortStyle}).joined(separator: ", ")
-           
+            let string = scheduleService.arrayToString(array: selectedSchedule)
             cell.setup(string)
         }
         return cell
@@ -438,9 +438,11 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
 // MARK: - TrackerCreationViewController Extension
 
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
-    func createSchedule(schedule: [WeekDay]) {
+
+    func createSchedule(schedule: [Int]) {
         self.selectedSchedule = schedule
-        let additionalText = selectedSchedule.map {$0.shortStyle}.joined(separator: ", ")
+        let additionalText = scheduleService.arrayToString(array: selectedSchedule)
+
         print("additional Text \(additionalText)")
         self.setScheduleButtonSubTitle(with: additionalText)
         buttonsTableView.reloadData()
