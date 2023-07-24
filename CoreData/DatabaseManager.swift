@@ -12,6 +12,13 @@ final class DatabaseManager {
     
     private let modelName = "CoreDataModel"
     static let shared = DatabaseManager()
+    var completedTrackers: [TrackerRecord]? = []
+    var trackerStore: TrackerStoreProtocol?
+    var trackerCategoryStore: TrackerCategoryStoreProtocol?
+    var trackerRecordStore: TrackerRecordStoreProtocol?
+    
+    private var categoryName: [String]?
+    var visibleCategories: [TrackerCategory]? 
     
     var context: NSManagedObjectContext {
         persistentContainer.viewContext
@@ -41,4 +48,17 @@ final class DatabaseManager {
             }
         }
     }
+    
+//    func fetchRecordFromStore() {
+//        completedTrackers = trackerRecordStore?.fetchTrackerRecords()
+//    }
+//    
+//    func getCategoryName() {
+//        categoryName = trackerCategoryStore?.getCategoriesNames()
+//    }
+//    
+//    func fetchVisibleCategoriesFromStore() {
+//        visibleCategories = trackerStore?.fetchTrackers()
+//    }
+    
 }

@@ -23,7 +23,7 @@ struct Schedule {
 
 
 enum WeekDay: String, CaseIterable {
-    case monday
+    case monday 
     case tuesday
     case wednesday
     case thursday

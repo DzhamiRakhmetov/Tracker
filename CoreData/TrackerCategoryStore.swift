@@ -8,18 +8,13 @@
 import Foundation
 import CoreData
 
-// MARK: - TrackerCategoryStoreProtocol
-
-protocol TrackerCategoryStoreProtocol {
-    func addCategory(category: String) throws
-    func fetchCategory(with name: String) -> TrackerCategoryCoreData?
-}
-
-
-// MARK: - TrackerCategoryStore Class
 class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
 
     private let context: NSManagedObjectContext
+    private var insertedIndexes: IndexSet?
+    private var deletedIndexes: IndexSet?
+    
+    private let databaseManager = DatabaseManager.shared
 
     convenience override init() {
         let context = DatabaseManager.shared.context
@@ -91,5 +86,27 @@ class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
 // MARK: - Extensions
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
-
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        insertedIndexes = IndexSet()
+        deletedIndexes = IndexSet()
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+     //   databaseManager.getCategoryName()
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            if let indexPath = newIndexPath {
+                insertedIndexes?.insert(indexPath.item)
+            }
+        case .delete:
+            if let indexPath = indexPath {
+                deletedIndexes?.insert(indexPath.item)
+            }
+        default:
+            break
+        }
+    }
 }

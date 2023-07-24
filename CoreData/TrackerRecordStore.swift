@@ -11,6 +11,7 @@ import CoreData
 final class TrackerRecordStore: NSObject {
     
     private let context: NSManagedObjectContext
+    private let databaseManager = DatabaseManager.shared
     
     
     convenience override init() {
@@ -35,6 +36,44 @@ final class TrackerRecordStore: NSObject {
         try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
+    
+    func addTrackerRecord(tracker: TrackerRecord) {
+        if !isRecordExist(tracker: tracker) {
+            let record = TrackerRecordCoreData(context: context)
+            record.id = tracker.id
+            record.date = tracker.date
+
+            do {
+                try context.save()
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    func deleteRecord(tracker: TrackerRecord) {
+        guard let objects = fetchedResultsController.fetchedObjects else { return }
+        
+        var deletingRecord: TrackerRecordCoreData?
+        
+        if isRecordExist(tracker: tracker) {
+            objects.forEach { record in
+                let isSameDay = Calendar.current.isDate(tracker.date, inSameDayAs: record.date ?? Date())
+                if record.id == tracker.id && isSameDay {
+                    deletingRecord = record
+                }
+            }
+            
+            guard let object = try? context.existingObject(with: deletingRecord?.objectID ?? NSManagedObjectID()) else { return }
+            
+            context.delete(object)
+            do {
+                try context.save()
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
 
     func isRecordExist(tracker: TrackerRecord) -> Bool {
         guard let objects = fetchedResultsController.fetchedObjects else { return false }
@@ -50,19 +89,7 @@ final class TrackerRecordStore: NSObject {
         return result
     }
 
-    func addTrackerRecord(tracker: TrackerRecord) {
-        if !isRecordExist(tracker: tracker) {
-            let record = TrackerRecordCoreData(context: context)
-            record.id = tracker.id
-            record.date = tracker.date
 
-            do {
-                try context.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
-    }
 
     func fetchTrackerRecords() -> [TrackerRecord] {
         guard let records = fetchedResultsController.fetchedObjects else { return [] }
@@ -75,10 +102,14 @@ final class TrackerRecordStore: NSObject {
         }
         return currentRecord
     }
+    
+    
 }
     
-
+// MARK: - Extensions
 
 extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
-    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    //    databaseManager.fetchRecordFromStore()
+    }
 }

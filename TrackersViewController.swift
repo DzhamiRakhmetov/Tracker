@@ -7,15 +7,19 @@
 
 import UIKit
 
+
+
 final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     var categoryStore: TrackerCategoryStore
     var completedTrackers: [TrackerRecord]
     var visibleCategories: [TrackerCategory]
     var trackerStore: TrackerStore
+    var trackerRecordStore: TrackerRecordStore
     private let dataManager: DataManager
     
     var currentDate: Date = .init()
+
     
     private lazy var addButton: UIButton = {
         let button = UIButton()
@@ -115,13 +119,15 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         completedTrackers: [TrackerRecord] = [], // viewModel
         visibleCategories: [TrackerCategory] = [], // viewModel
         trackerStore: TrackerStore = TrackerStore(), // viewModel
-        dataManager: DataManager = DataManager()
+        dataManager: DataManager = DataManager(),
+        trackerRecordStore: TrackerRecordStore = TrackerRecordStore()
     ) {
         self.categoryStore = categories
         self.completedTrackers = completedTrackers
         self.visibleCategories = visibleCategories
         self.trackerStore = trackerStore
         self.dataManager = dataManager
+        self.trackerRecordStore = trackerRecordStore
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -183,43 +189,41 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
   
     
-//    private func reloadVisibleCategories(text: String?, date: Date) {
-//        let calendar = Calendar.current
-//        let filterWeekDay = calendar.component(.weekday, from: date)
-//
-//        let selectWeekday = WeekDay(rawValue: filterWeekDay)
-//        
-//
-//        let filterText = (text ?? "").lowercased()
-//
-//        visibleCategories =  visibleCategories.compactMap { category in
-//
-//            let trackers = category.trackers.filter { tracker in
-//                //1
-//                let textCondition = filterText.isEmpty ||
-//                tracker.name.lowercased().contains(filterText)
-//
-//                //2
-//                guard let selectWeekday = selectWeekday  else {return textCondition }
-//
-//                //3
-//                let schedule = tracker.schedule.contains { value in
-//                    value == selectWeekday.rawValue
-//                }
-//
-//                return textCondition && schedule
-//            }
-//
-//            if trackers.isEmpty {
-//                return nil
-//            }
-//
-//            return TrackerCategory(title: category.title, trackers: trackers)
-//        }
-//
-//        collectionView.reloadData()
-//    }
-  
+    private func reloadVisibleCategories(text: String?, date: Date) {
+        let calendar = Calendar.current
+        let filterWeekDay = calendar.component(.weekday, from: date)
+        
+        let selectWeekday = WeekDay(rawValue: filterWeekDay)
+        let filterText = (text ?? "").lowercased()
+
+        visibleCategories = trackerStore.fetchTrackers()
+        visibleCategories.compactMap { category in
+
+            let trackers = category.trackers.filter { tracker in
+                //1
+                let textCondition = filterText.isEmpty ||
+                tracker.name.lowercased().contains(filterText)
+
+                //2
+                guard let selectWeekday = selectWeekday  else {return textCondition }
+
+                //3
+                let schedule = tracker.schedule.contains { value in
+                    value == selectWeekday.rawValue
+                }
+                return textCondition && schedule
+            }
+            if trackers.isEmpty {
+                return nil
+            }
+            return TrackerCategory(title: category.title, trackers: trackers)
+        }
+        collectionView.reloadData()
+    }
+    
+
+    
+
     // MARK: - @objc
     
     @objc private func addNewTracker() {
@@ -249,13 +253,11 @@ extension TrackersViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-    //    reloadVisibleCategories(text: searchField.text, date: datePicker.date)
+        //    reloadVisibleCategories(text: searchField.text, date: datePicker.date)
         return true
     }
     
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        print(#function, textField.text ?? "")
-    }
+
 }
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
@@ -302,7 +304,9 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     private func isTrackerCompletedToday(id: UUID) -> Bool {
-        completedTrackers.contains { trackerRecord in
+        completedTrackers = trackerRecordStore.fetchTrackerRecords()
+        
+        return completedTrackers.contains { trackerRecord in
             let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
            return trackerRecord.id == id && isSameDay
         }
@@ -342,7 +346,7 @@ extension TrackersViewController: TrackerCellDelegate {
     
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool) {
         
-        isOn ? uncompleteTracher(id, indexPath) : completeTracker(id, indexPath)
+        isOn ? uncompleteTracker(id, indexPath) : completeTracker(id, indexPath)
         print("*****")
         completedTrackers.forEach({print($0.id)})
         print("*****")
@@ -356,13 +360,18 @@ extension TrackersViewController: TrackerCellDelegate {
     private func completeTracker(_ id: UUID, _ indexPath: IndexPath) {
         let trackerRecord = TrackerRecord(id: id, date: datePicker.date)
         completedTrackers.append(trackerRecord)
-        print(completedTrackers.count)
+        trackerRecordStore.addTrackerRecord(tracker: trackerRecord)
+        print("completedTrackers - \(completedTrackers.count)")
     }
     
-    private func uncompleteTracher(_ id: UUID, _ indexPath: IndexPath) {
+    private func uncompleteTracker(_ id: UUID, _ indexPath: IndexPath) {
+        let trackerRecord = TrackerRecord(id: id, date: datePicker.date)
+        trackerRecordStore.deleteRecord(tracker: trackerRecord)
+        print("Deleted Trackers - \(trackerRecord)")
+        
         completedTrackers.removeAll{ trackerRecord in
             let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
-            
+
             return trackerRecord.id == id && isSameDay
         }
     }
@@ -371,7 +380,7 @@ extension TrackersViewController: TrackerCellDelegate {
 // MARK: - extension TrackerStoreProtocol
 
 extension TrackersViewController: TrackerStoreProtocol {
-    
+  
     func createTracker(_ tracker: Tracker, categoryName: String) {
         let trackerStore = TrackerStore()
         do {
@@ -388,4 +397,4 @@ extension TrackersViewController: TrackerStoreProtocol {
 
 
     
-    
+

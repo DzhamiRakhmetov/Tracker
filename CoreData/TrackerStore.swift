@@ -32,6 +32,19 @@ class TrackerStore: NSObject {
         return fetchResultController
     }()
     
+//    func createTracker(_ tracker: Tracker, categoryName: String) {
+//        let trackerStore = TrackerStore()
+//        do {
+//            try trackerStore.addTracker(tracker: tracker, in: categoryName)
+//        } catch let error {
+//            print(error.localizedDescription)
+//        }
+//        reloadData()
+//        collectionView.reloadData()
+//        print(tracker)
+//        print(categoryName)
+//    }
+
    
     
     // add tracker
@@ -48,7 +61,7 @@ class TrackerStore: NSObject {
         trackerDB.name = tracker.name
         trackerDB.color = UIColorMarshalling.serialize(color: tracker.color)
         trackerDB.emoji = tracker.emoji
-        trackerDB.schedule = tracker.schedule ?? [] //.map { String($0) }.joined(separator: ",")
+        trackerDB.schedule = tracker.schedule ?? [] //.map({String($0) }.joined(separator: ","))
         trackerDB.category = category
         
         do {
@@ -130,10 +143,11 @@ class TrackerStore: NSObject {
     
 }
 
+// MARK: - Extensions
+
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.fetchTrackers()
-        
+    //    databaseManager.fetchVisibleCategoriesFromStore()
     }
 }
 

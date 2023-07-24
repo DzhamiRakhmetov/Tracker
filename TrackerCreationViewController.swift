@@ -7,11 +7,6 @@
 
 import UIKit
 
-protocol TrackerStoreProtocol: AnyObject {
-    func createTracker(_ tracker: Tracker, categoryName: String)
-   
-}
-
 final class TrackerCreationViewController: UIViewController {
     
     var dataForTableView = ["Категория", "Расписание"]
@@ -21,7 +16,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private var selectedTrackerName: String?
     private var selectedCategory: String?
-//    private var selectedSchedule: [WeekDay] = []
+    //    private var selectedSchedule: [WeekDay] = []
     private var selectedSchedule: [Int] = []
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
@@ -76,6 +71,7 @@ final class TrackerCreationViewController: UIViewController {
         textFiled.placeholder = "Введите название трекера"
         textFiled.backgroundColor = .custom.backgroundDay
         textFiled.clearButtonMode = .whileEditing
+        textFiled.isUserInteractionEnabled = true
         textFiled.returnKeyType = .done                      // клавиша "Готово"
         textFiled.enablesReturnKeyAutomatically = true      // "Готово" недоступно пока пользователь не ввел текст
         textFiled.smartInsertDeleteType = .no              // запрет вставки
@@ -103,13 +99,13 @@ final class TrackerCreationViewController: UIViewController {
         return label
     }()
     
-//    private lazy var scheduleButtonSubTitle: UILabel = {
-//         let label = UILabel()
-//         label.text = scheduleSubTitle
-//         label.font = .systemFont(ofSize: 16)
-//         label.translatesAutoresizingMaskIntoConstraints = false
-//         return label
-//     }()
+    //    private lazy var scheduleButtonSubTitle: UILabel = {
+    //         let label = UILabel()
+    //         label.text = scheduleSubTitle
+    //         label.font = .systemFont(ofSize: 16)
+    //         label.translatesAutoresizingMaskIntoConstraints = false
+    //         return label
+    //     }()
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -184,7 +180,7 @@ final class TrackerCreationViewController: UIViewController {
     }()
     
     private lazy var selectedBackgroundForEmoji: UIView = {
-       let view = UIView()
+        let view = UIView()
         view.backgroundColor = .custom.gray
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
@@ -192,12 +188,21 @@ final class TrackerCreationViewController: UIViewController {
     }()
     
     private lazy var selectedBackgroundForColor: UIView = {
-       let view = UIView()
+        let view = UIView()
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 3
         view.layer.masksToBounds = true
         return view
     }()
+    
+    private var isTrackerDataComplete: Bool {
+        let isTrackerNameSelect = selectedTrackerName != nil
+        let isCategorySelect = selectedCategory != nil
+        let isScheduleSelect = !selectedSchedule.isEmpty
+        let isEmojiSelect = selectedEmoji != nil
+        let isColorSelect = selectedColor != nil
+        return isTrackerNameSelect && isCategorySelect && isScheduleSelect && isEmojiSelect && isColorSelect
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -286,22 +291,36 @@ final class TrackerCreationViewController: UIViewController {
         present(vc, animated: true)
     }
     
+    private func activateCreateButton() {
+            guard isTrackerDataComplete else { return }
+        createButton.backgroundColor = .custom.black
+        createButton.isUserInteractionEnabled = true
+        }
+    
+    private func deactivateCreateButton() {
+        guard !isTrackerDataComplete else { return }
+        createButton.backgroundColor = .custom.gray
+        createButton.isUserInteractionEnabled = false
+    }
     
     private func setScheduleButtonSubTitle(with additionalText: String?) {
         let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? ButtonCell
         scheduleButtonSubTitile?.setup(additionalText)
     }
     
-//    private func showCharactersLimitLabel(){
-//        scrollView.contentSize = CGSize(width: scrollView.contentSize.width, height: scrollView.contentSize.height + 35)
-//
-//    }
-        @objc func createAction() {
+    //    private func showCharactersLimitLabel(){
+    //        scrollView.contentSize = CGSize(width: scrollView.contentSize.width, height: scrollView.contentSize.height + 35)
+    //
+    //    }
+    
+    // MARK: - Objc funcs
+    
+    @objc func createAction() {
         guard let selectedCategory = selectedCategory else {
             //TODO: alert
             return
         }
-            
+        
         let newTracker = Tracker(
             id: UUID(), //!!!!!
             name: trackerTextFiled.text ?? "",
@@ -332,13 +351,18 @@ extension TrackerCreationViewController: UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        trackerTextFiled.becomeFirstResponder()
+        trackerTextFiled.resignFirstResponder()
         return true
     }
     
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        trackerTextFiled.resignFirstResponder()
-        return true
+    func textFieldDidEndEditing(_ textField: UITextField) {
+       guard let newTrackerName = trackerTextFiled.text, newTrackerName != "" else {
+            selectedTrackerName = nil
+            deactivateCreateButton()
+            return
+        }
+        selectedTrackerName = newTrackerName
+        activateCreateButton()
     }
 }
 
@@ -375,7 +399,7 @@ extension TrackerCreationViewController: UITableViewDataSource {
         cell.accessoryType = .disclosureIndicator
         cell.label.text = dataForTableView[indexPath.row]
         cell.backgroundColor = .custom.backgroundDay
-
+        
         if indexPath.row == 0 {
             cell.setup(selectedCategory)
         } else {
@@ -420,10 +444,12 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
         case emojisCollectionView:
             cell.selectedBackgroundView = selectedBackgroundForEmoji
             selectedEmoji = emojies[indexPath.row]
+            activateCreateButton()
         default:
             selectedBackgroundForColor.layer.borderColor = colors[indexPath.row].cgColor.copy(alpha: 0.3)
             cell.selectedBackgroundView = selectedBackgroundForColor
             selectedColor = colors[indexPath.row]
+            activateCreateButton()
         }
     }
     
@@ -438,11 +464,11 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
 // MARK: - TrackerCreationViewController Extension
 
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
-
+    
     func createSchedule(schedule: [Int]) {
         self.selectedSchedule = schedule
         let additionalText = scheduleService.arrayToString(array: selectedSchedule)
-
+        
         print("additional Text \(additionalText)")
         self.setScheduleButtonSubTitle(with: additionalText)
         buttonsTableView.reloadData()

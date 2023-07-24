@@ -103,6 +103,7 @@ extension TrackerTypeViewController: TrackerStoreProtocol {
     func createTracker(_ tracker: Tracker, categoryName: String) {
         dismiss(animated: true) {
             self.delegate?.createTracker(tracker, categoryName: categoryName)
+            
         }
     }
 }

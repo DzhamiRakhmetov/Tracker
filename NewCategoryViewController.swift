@@ -100,9 +100,9 @@ final class NewCategoryViewController: UIViewController {
             self.delegate?.setCategory(category: text)
             
           //  self.delegate?.setCategory(category: self.newCategoryName)
-//            self.disableDoneButton()
-//            self.newCategoryName = nil
-//            self.categoryNameTextFiled.text = nil
+            self.disableDoneButton()
+            self.newCategoryName = nil
+            self.categoryNameTextFiled.text = nil
         }
     }
 }
