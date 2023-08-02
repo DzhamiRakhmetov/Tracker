@@ -1,9 +1,3 @@
-//
-//  TrackerStoreError.swift
-//  Tracker
-//
-//  Created by Dzhami on 10.07.2023.
-//
 
 import Foundation
 // MARK: - Errors

@@ -1,21 +1,19 @@
-//
-//  TrackerTypeViewController.swift
-//  Tracker
-//
-//  Created by Джами on 28.04.2023.
-//
 
 import UIKit
+
+// MARK: -  TrackerType Enum
 
 enum TrackerType {
     case regular
     case irregular
 }
 
+// MARK: - final class TrackerTypeViewController
+
 final class TrackerTypeViewController: UIViewController {
     
-    weak var delegate: TrackerStoreProtocol?
-    
+   weak var delegate: TrackerStoreProtocol?
+
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -82,6 +80,9 @@ final class TrackerTypeViewController: UIViewController {
             stackView.heightAnchor.constraint(equalToConstant: 135)
         ])
     }
+    
+    // MARK: - @objc func
+    
     @objc func irregularButtonClicked() {
         let vc = TrackerCreationViewController()
         vc.trackerType = .irregular
@@ -98,12 +99,13 @@ final class TrackerTypeViewController: UIViewController {
     }
 }
 
+// MARK: - Extension
+
 extension TrackerTypeViewController: TrackerStoreProtocol {
-    
+  
     func createTracker(_ tracker: Tracker, categoryName: String) {
         dismiss(animated: true) {
             self.delegate?.createTracker(tracker, categoryName: categoryName)
-            
         }
     }
 }

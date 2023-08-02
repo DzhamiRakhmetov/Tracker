@@ -8,16 +8,16 @@
 import CoreData
 import UIKit
 
-
-
 // MARK: - TrackerStore Class
 
 class TrackerStore: NSObject {
     private var context: NSManagedObjectContext { databaseManager.context}
-    private let databaseManager = DatabaseManager.shared // !!!!!
+    private let databaseManager = DatabaseManager.shared
+    private var insertedIndexes: IndexSet?
+    private var deletedIndexes: IndexSet?
     
     lazy var fetchResultController: NSFetchedResultsController<TrackerCoreData> = {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData") //!!!!!
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerCoreData.category?.title, ascending: false)]
         
         let fetchResultController = NSFetchedResultsController(
@@ -32,28 +32,11 @@ class TrackerStore: NSObject {
         return fetchResultController
     }()
     
-//    func createTracker(_ tracker: Tracker, categoryName: String) {
-//        let trackerStore = TrackerStore()
-//        do {
-//            try trackerStore.addTracker(tracker: tracker, in: categoryName)
-//        } catch let error {
-//            print(error.localizedDescription)
-//        }
-//        reloadData()
-//        collectionView.reloadData()
-//        print(tracker)
-//        print(categoryName)
-//    }
-
-   
-    
     // add tracker
     func addTracker(tracker: Tracker, in category: String) throws {
-        guard
-            let category = TrackerCategoryStore(context: context)
-                .fetchCategory(with: category)
+          guard let category = TrackerCategoryStore(context: context)
+                .fetchNewCategory(with: category)
         else { return }
-        // do not create new object of TrackerCategoryStore !!!!!
         
         let trackerDB = TrackerCoreData(context: context)
         
@@ -61,7 +44,7 @@ class TrackerStore: NSObject {
         trackerDB.name = tracker.name
         trackerDB.color = UIColorMarshalling.serialize(color: tracker.color)
         trackerDB.emoji = tracker.emoji
-        trackerDB.schedule = tracker.schedule ?? [] //.map({String($0) }.joined(separator: ","))
+        trackerDB.schedule = tracker.schedule ?? []
         trackerDB.category = category
         
         do {
@@ -99,7 +82,6 @@ class TrackerStore: NSObject {
             }
             currentCategory.append(category)
         }
-
         return currentCategory
     }
     
@@ -131,14 +113,15 @@ class TrackerStore: NSObject {
         guard let emoji = trackerCoreData.emoji else {
             throw TrackerStoreError.invalidTrackerEmoji
         }
-        guard let schedule = trackerCoreData.schedule  else {
+        guard let scheduleInt = trackerCoreData.schedule  else {
             throw TrackerStoreError.invalidTrackerScheduleInt
         }
+        
         return Tracker(id: id,
                        name: name,
                        color: color,
                        emoji: emoji,
-                       schedule: schedule)
+                       schedule: scheduleInt)
     }
     
 }
@@ -146,9 +129,11 @@ class TrackerStore: NSObject {
 // MARK: - Extensions
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-    //    databaseManager.fetchVisibleCategoriesFromStore()
-    }
+   
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {}
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {}
+    
 }
 
 

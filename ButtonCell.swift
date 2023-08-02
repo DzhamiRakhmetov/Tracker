@@ -1,13 +1,7 @@
-//
-//  ButtonCell.swift
-//  Tracker
-//
-//  Created by Джами on 29.04.2023.
-//
 
 import UIKit
 
-class ButtonCell: UITableViewCell {
+final class ButtonCell: UITableViewCell {
     
     lazy var label: UILabel = {
         let label = UILabel()
@@ -21,10 +15,10 @@ class ButtonCell: UITableViewCell {
         return label
     }()
     
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setuUpViews()
+        backgroundColor = .custom.backgroundDay
     }
     
     required init?(coder: NSCoder) {
@@ -49,28 +43,6 @@ class ButtonCell: UITableViewCell {
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
         ])
     }
-    
-    // TODO: - additional Text
-    
-//    func set( additionalText: String? = nil) {
-//
-//        if let additionalText = additionalText {
-//            let paragraphStyle = NSMutableParagraphStyle()
-//            paragraphStyle.lineSpacing = 2
-//            let labelAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.backgroundDay]
-//            let additionalTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.custom.lightGray]
-//            let labelText = NSMutableAttributedString(string: label.text ?? "", attributes: labelAttributes)
-//            let emptyString = NSAttributedString(string: "\n", attributes: labelAttributes);
-//
-//            let additionalText = NSMutableAttributedString(string: "\n\(additionalText)", attributes: additionalTextAttributes)
-//            labelText.append(emptyString)
-//            labelText.append(additionalText)
-//            label.numberOfLines = 3
-//            label.attributedText = labelText
-//        } else {
-//            label.text = label.text
-//        }
-//    }
     
     func setup(_ detail: String?) {
         descriptionlLabel.text = detail

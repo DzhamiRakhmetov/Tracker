@@ -1,9 +1,3 @@
-//
-//  TabBarController.swift
-//  Tracker
-//
-//  Created by Джами on 27.04.2023.
-//
 
 import UIKit
 

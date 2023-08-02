@@ -1,31 +1,20 @@
-//
-//  DatabaseManager.swift
-//  Tracker
-//
-//  Created by Dzhami on 03.07.2023.
-//
 
-import Foundation
+import UIKit
 import CoreData
 
 final class DatabaseManager {
     
     private let modelName = "CoreDataModel"
+    private var categoryName: [String]?
     static let shared = DatabaseManager()
+    
     var completedTrackers: [TrackerRecord]? = []
     var trackerStore: TrackerStoreProtocol?
-    var trackerCategoryStore: TrackerCategoryStoreProtocol?
-    var trackerRecordStore: TrackerRecordStoreProtocol?
-    
-    private var categoryName: [String]?
-    var visibleCategories: [TrackerCategory]? 
+    var visibleCategories: [TrackerCategory]?
     
     var context: NSManagedObjectContext {
         persistentContainer.viewContext
     }
-    
-  
-    
     
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: modelName)
@@ -44,21 +33,10 @@ final class DatabaseManager {
                 try context.save()
             } catch {
                 let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                assertionFailure("Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
     }
-    
-//    func fetchRecordFromStore() {
-//        completedTrackers = trackerRecordStore?.fetchTrackerRecords()
-//    }
-//    
-//    func getCategoryName() {
-//        categoryName = trackerCategoryStore?.getCategoriesNames()
-//    }
-//    
-//    func fetchVisibleCategoriesFromStore() {
-//        visibleCategories = trackerStore?.fetchTrackers()
-//    }
-    
 }
+
+

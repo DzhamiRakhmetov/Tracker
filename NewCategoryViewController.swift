@@ -1,15 +1,13 @@
-//
-//  NewCategoryViewController.swift
-//  Tracker
-//
-//  Created by Джами on 04.05.2023.
-//
 
 import UIKit
+
+// MARK: - protocol NewCategoryViewControllerDelegate
 
 protocol NewCategoryViewControllerDelegate: AnyObject {
     func setCategory(category: String?)
 }
+
+// MARK: - final class NewCategoryViewController
 
 final class NewCategoryViewController: UIViewController {
     
@@ -98,8 +96,6 @@ final class NewCategoryViewController: UIViewController {
         dismiss(animated: true) {
             print("New Category - \(String(describing: self.newCategoryName))")
             self.delegate?.setCategory(category: text)
-            
-          //  self.delegate?.setCategory(category: self.newCategoryName)
             self.disableDoneButton()
             self.newCategoryName = nil
             self.categoryNameTextFiled.text = nil

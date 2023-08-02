@@ -1,9 +1,4 @@
-//
-//  TrackerRecordStore.swift
-//  Tracker
-//
-//  Created by Dzhami on 03.07.2023.
-//
+
 
 import UIKit
 import CoreData
@@ -25,9 +20,9 @@ final class TrackerRecordStore: NSObject {
     
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
-
+        
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerRecordCoreData.id, ascending: true)]
-
+        
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: context,
                                                                   sectionNameKeyPath: nil,
@@ -42,7 +37,7 @@ final class TrackerRecordStore: NSObject {
             let record = TrackerRecordCoreData(context: context)
             record.id = tracker.id
             record.date = tracker.date
-
+            
             do {
                 try context.save()
             } catch let error {
@@ -51,7 +46,7 @@ final class TrackerRecordStore: NSObject {
         }
     }
     
-    func deleteRecord(tracker: TrackerRecord) {
+    func deleteTrackerRecord(tracker: TrackerRecord) {
         guard let objects = fetchedResultsController.fetchedObjects else { return }
         
         var deletingRecord: TrackerRecordCoreData?
@@ -74,12 +69,12 @@ final class TrackerRecordStore: NSObject {
             }
         }
     }
-
+    
     func isRecordExist(tracker: TrackerRecord) -> Bool {
         guard let objects = fetchedResultsController.fetchedObjects else { return false }
-
+        
         var result = false
-
+        
         objects.forEach { object in
             let isSameDay = Calendar.current.isDate(tracker.date, inSameDayAs: object.date ?? Date())
             if object.id == tracker.id && isSameDay {
@@ -88,28 +83,24 @@ final class TrackerRecordStore: NSObject {
         }
         return result
     }
-
-
-
+    
     func fetchTrackerRecords() -> [TrackerRecord] {
         guard let records = fetchedResultsController.fetchedObjects else { return [] }
-
+        
         var currentRecord: [TrackerRecord] = []
-
+        
         for record in records {
             currentRecord.append(TrackerRecord(id: record.id ?? UUID(),
                                                date: record.date ?? Date()))
         }
         return currentRecord
     }
-    
-    
 }
-    
+
 // MARK: - Extensions
 
 extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-    //    databaseManager.fetchRecordFromStore()
+        
     }
 }

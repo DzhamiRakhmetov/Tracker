@@ -1,11 +1,13 @@
-//
-//  TrackerCreationViewController.swift
-//  Tracker
-//
-//  Created by Джами on 28.04.2023.
-//
 
 import UIKit
+
+// MARK: - TrackerStoreProtocol
+
+protocol TrackerStoreProtocol: AnyObject {
+    func createTracker(_ tracker: Tracker, categoryName: String)
+}
+
+// MARK: - class TrackerCreationViewController
 
 final class TrackerCreationViewController: UIViewController {
     
@@ -13,25 +15,20 @@ final class TrackerCreationViewController: UIViewController {
     var trackerStore: TrackerStoreProtocol?
     var trackerType: TrackerType?
     let scheduleService = ScheduleService()
+    lazy var trackersViewController = TrackersViewController()
     
     private var selectedTrackerName: String?
     private var selectedCategory: String?
-    //    private var selectedSchedule: [WeekDay] = []
     private var selectedSchedule: [Int] = []
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
     private var scheduleSubTitle: String = ""
-    
     private let emojies: [String] = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
     private lazy var buttonsTableViewHeight: CGFloat = 150
-    
     private let colors: [UIColor] = SelectionColor.allCases.compactMap({UIColor(named: $0.rawValue)})
-    
     private var contentSize : CGSize  {
         CGSize(width: view.frame.width, height: view.frame.height + 105)
     }
-    
-    lazy var trackersViewController = TrackersViewController()
     
     private lazy var contentView: UIView = {
         let contentView = UIView()
@@ -60,7 +57,6 @@ final class TrackerCreationViewController: UIViewController {
         label.textAlignment = .center
         return label
     }()
-    
     
     private lazy var trackerTextFiled: UITextField = {
         let textFiled = UITextField()
@@ -99,13 +95,13 @@ final class TrackerCreationViewController: UIViewController {
         return label
     }()
     
-    //    private lazy var scheduleButtonSubTitle: UILabel = {
-    //         let label = UILabel()
-    //         label.text = scheduleSubTitle
-    //         label.font = .systemFont(ofSize: 16)
-    //         label.translatesAutoresizingMaskIntoConstraints = false
-    //         return label
-    //     }()
+    private lazy var scheduleButtonSubTitle: UILabel = {
+        let label = UILabel()
+        label.text = scheduleSubTitle
+        label.font = .systemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
@@ -196,12 +192,12 @@ final class TrackerCreationViewController: UIViewController {
     }()
     
     private var isTrackerDataComplete: Bool {
-        let isTrackerNameSelect = selectedTrackerName != nil
-        let isCategorySelect = selectedCategory != nil
+        let isTrackerNameSelect = selectedTrackerName
+        let isCategorySelect = selectedCategory
         let isScheduleSelect = !selectedSchedule.isEmpty
-        let isEmojiSelect = selectedEmoji != nil
-        let isColorSelect = selectedColor != nil
-        return isTrackerNameSelect && isCategorySelect && isScheduleSelect && isEmojiSelect && isColorSelect
+        let isEmojiSelect = selectedEmoji
+        let isColorSelect = selectedColor
+        return (isTrackerNameSelect != nil) && (isCategorySelect != nil) && isScheduleSelect && (isEmojiSelect != nil) && (isColorSelect != nil)
     }
     
     override func viewDidLoad() {
@@ -292,19 +288,20 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     private func activateCreateButton() {
-            guard isTrackerDataComplete else { return }
+        guard isTrackerDataComplete else { return }
         createButton.backgroundColor = .custom.black
-        createButton.isUserInteractionEnabled = true
-        }
+        createButton.isEnabled = true
+    }
     
     private func deactivateCreateButton() {
         guard !isTrackerDataComplete else { return }
         createButton.backgroundColor = .custom.gray
-        createButton.isUserInteractionEnabled = false
+        createButton.isEnabled = false
     }
     
     private func setScheduleButtonSubTitle(with additionalText: String?) {
-        let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? ButtonCell
+        let index = IndexPath(row: 1, section: 0)
+        let scheduleButtonSubTitile = buttonsTableView.cellForRow(at: index) as? ButtonCell
         scheduleButtonSubTitile?.setup(additionalText)
     }
     
@@ -322,14 +319,12 @@ final class TrackerCreationViewController: UIViewController {
         }
         
         let newTracker = Tracker(
-            id: UUID(), //!!!!!
+            id: UUID(),
             name: trackerTextFiled.text ?? "",
             color: selectedColor ?? .custom.black,
             emoji: selectedEmoji ?? "",
             schedule: selectedSchedule)
         
-        print("\(newTracker)")
-        print("selected schedule - \(selectedSchedule)")
         dismiss(animated: true) {
             self.trackerStore?.createTracker(newTracker, categoryName: selectedCategory)
         }
@@ -356,7 +351,7 @@ extension TrackerCreationViewController: UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-       guard let newTrackerName = trackerTextFiled.text, newTrackerName != "" else {
+        guard let newTrackerName = trackerTextFiled.text, newTrackerName != "" else {
             selectedTrackerName = nil
             deactivateCreateButton()
             return
@@ -459,17 +454,15 @@ extension TrackerCreationViewController: UICollectionViewDataSource, UICollectio
     }
 }
 
-
-
 // MARK: - TrackerCreationViewController Extension
 
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
     
-    func createSchedule(schedule: [Int]) {
-        self.selectedSchedule = schedule
-        let additionalText = scheduleService.arrayToString(array: selectedSchedule)
+    func createSchedule(schedule: [WeekDay]) {
+        let array = schedule.map({$0.number})
+        self.selectedSchedule = array
+        let additionalText = scheduleService.arrayToString(array: schedule)
         
-        print("additional Text \(additionalText)")
         self.setScheduleButtonSubTitle(with: additionalText)
         buttonsTableView.reloadData()
     }
