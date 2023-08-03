@@ -183,7 +183,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         visibleCategories = trackerStore.fetchTrackers().compactMap { category in
             
             let trackers = category.trackers.filter { tracker in
-                let textCondition = filterText.isEmpty || tracker.name.lowercased().contains(filterText)
+                let textCondition = filterText.isEmpty || tracker.name.lowercased().hasPrefix(filterText)
                 
                 guard let schedule = tracker.schedule  else { return textCondition }
                 
