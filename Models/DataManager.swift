@@ -13,23 +13,20 @@ class DataManager {
     var categories: [TrackerCategory] = [
     TrackerCategory(title: "Уборка",
         trackers: [
-        Tracker(id: UUID(),
-                name: "Помыть пол",
+            Tracker(id: UUID(), name: "Помыть пол",
                 color: .custom.colorSelection5,
                 emoji: "🙂",
-                schedule: [WeekDay.saturday, WeekDay.sunday]
+                schedule: [1] // [WeekDay.saturday, WeekDay.sunday]
                ),
-        Tracker(id: UUID(),
-                name: "Погладить одежду",
+            Tracker(id: UUID(), name: "Погладить одежду",
                 color: .custom.colorSelection7,
                 emoji: "😡",
-                schedule: [WeekDay.tuesday, WeekDay.wednesday])]),
+                schedule: [1])]), //[WeekDay.tuesday, WeekDay.wednesday])]),
     
     TrackerCategory(title: "Учеба",
                     trackers: [
-                    Tracker(id: UUID(),
-                            name: "Почитать",
+                        Tracker(id: UUID(), name: "Почитать",
                             color: .custom.colorSelection8,
                             emoji: "❤️",
-                            schedule: [WeekDay.monday, WeekDay.tuesday])])]
+                            schedule: [1])])] //[WeekDay.monday, WeekDay.tuesday])])]
 }

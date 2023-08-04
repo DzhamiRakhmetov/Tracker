@@ -1,20 +1,20 @@
-//
-//  ScheduleViewController.swift
-//  Tracker
-//
-//  Created by Джами on 03.05.2023.
-//
 
 import UIKit
+
+// MARK: - protocol ScheduleViewControllerDelegate
 
 protocol ScheduleViewControllerDelegate: AnyObject {
     func createSchedule (schedule: [WeekDay])
 }
 
+// MARK: - final class ScheduleViewController
+
 final class ScheduleViewController: UIViewController {
     
     weak var delegate: ScheduleViewControllerDelegate?
-    var selectedSchedule: [WeekDay] = []
+    var selectedSchedule: [Int] = []
+    private var arrayDays = WeekDay.allCases
+    private var selectIndex = [Int]()
     
     private lazy var headerTitile: UILabel = {
         let label = UILabel()
@@ -75,55 +75,50 @@ final class ScheduleViewController: UIViewController {
         ])
     }
     
-//    private func setDoneButton(){
-//        if selectedSchedule.isEmpty {
-//            doneButton.backgroundColor = .custom.gray
-//            doneButton.isEnabled = true
-//        } else {
-//            doneButton.backgroundColor = .custom.black
-//            doneButton.isEnabled = false
-//        }
-//    }
-    
-    private func switchStatus() {
-        for (index, weekDay) in WeekDay.allCases.enumerated() {
-            let indexPath = IndexPath(row: index, section: 0)
-            let cell = scheduleTableView.cellForRow(at: indexPath)
-            guard let switchView = cell?.accessoryView as? UISwitch else {return}
-            
-            if switchView.isOn {
-                selectedSchedule.append(weekDay)
-            } else {
-                selectedSchedule.removeAll { $0 == weekDay }
-            }
-            //setDoneButton()
-        }
-    }
+    // MARK: - @objc func
     
     @objc func doneButtonClicked() {
-        switchStatus()
-        delegate?.createSchedule(schedule: selectedSchedule)
-        print("Дни недели со ScheduleVC -\(selectedSchedule)")
-        scheduleTableView.reloadData()
+        doneButton.isEnabled = false
+        
+        //1
+        var selectDay = [WeekDay]()
+        for row in selectIndex {
+            let day = arrayDays[row]
+            selectDay.append(day)
+        }
+        delegate?.createSchedule(schedule: selectDay)
+        //  print("Дни недели со ScheduleVC -\(selectDay.compactMap({$0.shortDay}))")
         dismiss(animated: true)
     }
+    
+    @objc private func selectSwitch(_ sender: UISwitch) {
+        let row = sender.tag
+        if let index = selectIndex.firstIndex(of: row) {
+            selectIndex.remove(at: index)
+        } else {
+            selectIndex.append(row)
+        }
+        scheduleTableView.reloadRows(at: [IndexPath(row: row, section: 0)], with: .automatic)
+    }
 }
+
+// MARK: - ScheduleViewController extension
 
 extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return WeekDay.allCases.count
+        return arrayDays.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {return UITableViewCell()}
-        cell.textLabel?.text = WeekDay.allCases[indexPath.row].value
-        cell.backgroundColor = .custom.backgroundDay
+        cell.textLabel?.text = arrayDays[indexPath.row].value
         
         let switchView = UISwitch(frame: .zero)
-        switchView.setOn(false, animated: true)
+        switchView.isOn = selectIndex.contains(indexPath.row)
         switchView.onTintColor = .custom.blue
         switchView.tag = indexPath.row
+        switchView.addTarget(self, action: #selector(selectSwitch(_:)), for: .valueChanged)
         cell.accessoryView = switchView
         
         return cell

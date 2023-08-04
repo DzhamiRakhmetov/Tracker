@@ -1,16 +1,19 @@
-//
-//  TrackerTypeViewController.swift
-//  Tracker
-//
-//  Created by Джами on 28.04.2023.
-//
 
 import UIKit
 
+// MARK: -  TrackerType Enum
+
+enum TrackerType {
+    case regular
+    case irregular
+}
+
+// MARK: - final class TrackerTypeViewController
+
 final class TrackerTypeViewController: UIViewController {
     
-    weak var delegate: TrackerStoreProtocol?
-    
+   weak var delegate: TrackerStoreProtocol?
+
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +45,7 @@ final class TrackerTypeViewController: UIViewController {
         button.setTitle("Нерегулярные событие", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-       // button.addTarget(self, action: #selector(addNewTracker), for: .touchUpInside)
+        button.addTarget(self, action: #selector(irregularButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -78,15 +81,28 @@ final class TrackerTypeViewController: UIViewController {
         ])
     }
     
+    // MARK: - @objc func
+    
+    @objc func irregularButtonClicked() {
+        let vc = TrackerCreationViewController()
+        vc.trackerType = .irregular
+        vc.trackerStore = self
+        present(vc, animated: true)
+    }
+    
     @objc
     func regularButtonClicked() {
         let vc = TrackerCreationViewController()
+        vc.trackerType = .regular
         vc.trackerStore = self
         present(vc, animated: true)
     }
 }
 
+// MARK: - Extension
+
 extension TrackerTypeViewController: TrackerStoreProtocol {
+  
     func createTracker(_ tracker: Tracker, categoryName: String) {
         dismiss(animated: true) {
             self.delegate?.createTracker(tracker, categoryName: categoryName)

@@ -1,9 +1,3 @@
-//
-//  TabBarController.swift
-//  Tracker
-//
-//  Created by Джами on 27.04.2023.
-//
 
 import UIKit
 
@@ -16,7 +10,7 @@ final class TabBarController: UITabBarController {
     
     private func prepareTabBar() {
         viewControllers = [
-         prepareVC(viewController: TrackersViewController(), title: "Трекеры", image: UIImage(named: "CircleIcon")),
+            prepareVC(viewController: TrackersViewController(), title: "Трекеры", image: UIImage(named: "CircleIcon")),
          prepareVC(viewController: StatisticsViewController(), title: "Статистика", image: UIImage(named: "RabbitIcon"))
     ]}
     

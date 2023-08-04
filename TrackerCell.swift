@@ -1,15 +1,14 @@
-//
-//  TrackerCell.swift
-//  Tracker
-//
-//  Created by Джами on 08.05.2023.
-//
 
 import UIKit
 
+// MARK: - protocol TrackerCellDelegate
+
 protocol TrackerCellDelegate: AnyObject {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool)
+    func deleteTracker(at indexPath: IndexPath)
 }
+
+// MARK: - final class TrackerCell
 
 final class TrackerCell: UICollectionViewCell {
     
@@ -74,6 +73,7 @@ final class TrackerCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        addContextMenuInteraction()
     }
     
     required init?(coder: NSCoder) {
@@ -98,30 +98,30 @@ final class TrackerCell: UICollectionViewCell {
         dayCounterButton.isEnabled = isEnabled
     }
     
+    func setDayCounterButton(is: Bool) {
+        isCompletedToday ? setDoneImage() : setPlusImage()
+    }
     
     func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, selectedDate: Date, indexPath: IndexPath) {
-        self.trackerId = tracker.id
+        trackerId = tracker.id
         self.isCompletedToday = isCompletedToday
         self.selectedDate = selectedDate
         self.indexPath = indexPath
         
-        let color = tracker.color
         setUpConstraints()
         
-        trackerView.backgroundColor = color
-        dayCounterButton.backgroundColor = color
+        trackerView.backgroundColor = tracker.color
+        dayCounterButton.backgroundColor = tracker.color
         dayCounterButton.isHidden = selectedDate > Date()
         
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
         dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
         
-        
         let image = isCompletedToday ? setDoneImage() : setPlusImage()
-        
+       // setDayCounterButton(is: isCompletedToday)
+    
     }
-    
-    
     
     private func dayString(for count: Int) -> String {
         let mod10 = count % 10
@@ -170,14 +170,41 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
     
-    
     @objc func increaseDayCounter() {
-        
         guard let trackerId = trackerId, let indexPath = indexPath else {
             assertionFailure("no trackerID")
             return
         }
-            dayCounterButton.isEnabled = true
-            delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+        dayCounterButton.isEnabled = true
+        delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+    }
+}
+
+// MARK: - Extensions
+
+extension TrackerCell: UIContextMenuInteractionDelegate {
+    
+    func addContextMenuInteraction() {
+        let interaction = UIContextMenuInteraction(delegate: self)
+        trackerView.addInteraction(interaction)
+    }
+    
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let deleteImage = UIImage(systemName: "trash")
+        let editImage = UIImage(systemName: "square.and.pencil")
+        
+        return UIContextMenuConfiguration(actionProvider: { actions in
+            return UIMenu(children: [
+                UIAction(title: "Редактировать", image: editImage) { [weak self] _ in
+                    guard let self = self else { return }
+                    //   self.editTracker(cell: self)
+                },
+                UIAction(title: "Удалить", image: deleteImage, attributes: .destructive) { [weak self] _ in
+                    guard let self = self, let indexPath = indexPath else { return }
+                    delegate?.deleteTracker(at: indexPath)
+                }
+            ])
+        })
     }
 }
