@@ -282,7 +282,7 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     private func tapCategoriesCell(){
-        let vc = CategoriesViewController()
+        let vc = Assembler.setCategoriesViewController()
         vc.delegate = self
         present(vc, animated: true)
     }
