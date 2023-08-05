@@ -14,6 +14,8 @@ protocol CategoriesViewControllerDelegate: AnyObject {
 final class CategoriesViewController: UIViewController {
     weak var delegate: CategoriesViewControllerDelegate?
     
+    var viewModel: CategoriesViewModel?
+    
     private var categories = TrackerCategoryStore()
     private lazy var header: UILabel = {
         let label = UILabel()
