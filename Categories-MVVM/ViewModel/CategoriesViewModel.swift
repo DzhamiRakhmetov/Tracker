@@ -2,24 +2,23 @@ import Foundation
 
 // MARK: - Protocol
 
-@objc protocol CategoriesViewModelDelegate: AnyObject {
-    @objc optional func reloadData()
-    @objc func reloadDataCategories(_ array: [String])
+protocol CategoriesViewModelDelegate: AnyObject {
+    func reloadDataCategories(_ array: [String])
 }
 
 // MARK: - CategoriesViewModel
 
 final class CategoriesViewModel {
     weak var delegate: CategoriesViewModelDelegate?
-    private var categories: TrackerCategoryStore!
+    private let categoryStore: TrackerCategoryStoreProtocol
     
-    init(delegate: CategoriesViewModelDelegate? = nil) {
-        self.delegate = delegate
+    init(categoryStore: TrackerCategoryStoreProtocol) {
+        self.categoryStore = categoryStore
     }
 }
 
 // MARK: - Input 
-extension CategoriesViewModel {
+extension CategoriesViewModel: CategoriesViewModelProtocol {
     func viewDidLoad() {
         updateCategories()
     }
@@ -27,11 +26,19 @@ extension CategoriesViewModel {
     func setCategory(category: String?) {
         guard let category = category else { return }
         do {
-            try categories.addCategory(category: category)
+            try categoryStore.addCategory(category: category)
         } catch let error {
             print(error.localizedDescription)
         }
-        
+        updateCategories()
+    }
+    
+    func deleteCategory(at indexPath: IndexPath) {
+        do {
+            try categoryStore.deleteCategory(at: indexPath)
+        } catch let error {
+            print(error.localizedDescription)
+        }
         updateCategories()
     }
 }
@@ -39,13 +46,8 @@ extension CategoriesViewModel {
 // MARK: - Output
 extension CategoriesViewModel {
     
-    private func reloadData() {
-        delegate?.reloadData?()
-    }
-    
     private func updateCategories() {
-        categories = TrackerCategoryStore()
-        let array = categories.getCategoriesNames()
+        let array = categoryStore.getCategoriesNames()
         delegate?.reloadDataCategories(array)
     }
 }

@@ -2,10 +2,11 @@ import UIKit
 
 class Assembler {
     
-    class func setCategoriesViewController() -> CategoriesViewController {
-        let vc = CategoriesViewController()
-        let viewModel = CategoriesViewModel(delegate: vc)
-        vc.viewModel = viewModel
+    static func makeCategoriesViewController() -> CategoriesViewController {
+        
+        let categoryStore = TrackerCategoryStore()
+        let viewModel = CategoriesViewModel(categoryStore: categoryStore)
+        let vc = CategoriesViewController(viewModel: viewModel)
         return vc
     }
 }

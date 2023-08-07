@@ -10,19 +10,31 @@ protocol CategoriesViewControllerDelegate: AnyObject {
 final class CategoriesViewController: UIViewController {
     weak var delegate: CategoriesViewControllerDelegate?
     
-    var viewModel: CategoriesViewModel?
+    private var viewModel: CategoriesViewModelProtocol
     private lazy var categoryView: UICategoryListView = UICategoryListView()
+    
+    init(viewModel: CategoriesViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func loadView() {
+        self.view = categoryView
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        viewModel?.delegate = self
+        viewModel.delegate = self
         view.backgroundColor = .custom.white
         setUpConstraints()
-        viewModel?.viewDidLoad()
+        viewModel.viewDidLoad()
     }
     
     private func setUpConstraints() {
-        view.addSubview(categoryView)
         categoryView.translatesAutoresizingMaskIntoConstraints = false
         categoryView.didSelectCategory = doneButtonClicked
         categoryView.delegate = self
@@ -46,7 +58,7 @@ final class CategoriesViewController: UIViewController {
 
 extension CategoriesViewController: NewCategoryViewControllerDelegate {
     func setCategory(category: String?) {
-        viewModel?.setCategory(category: category)
+        viewModel.setCategory(category: category)
     }
 }
 
@@ -58,8 +70,7 @@ extension CategoriesViewController: CategoriesViewModelDelegate {
 
 extension CategoriesViewController: UICategoryListViewDelegate {
     func didSelect(_ category: String) {
-        dismiss(animated: true) {
-            self.delegate?.selectCategory(category)
-        }
+        delegate?.selectCategory(category)
+        dismiss(animated: true) {}
     }
 }

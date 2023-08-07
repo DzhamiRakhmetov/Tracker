@@ -4,7 +4,7 @@ import UIKit
 class OnboardingPageViewController: UIPageViewController {
     
     private lazy var controllers: [OnboardingViewController] = {
-       let firstVC = OnboardingViewController()
+        let firstVC = OnboardingViewController()
         firstVC.onboardingLabel.text = "Отслеживайте только то, что хотите"
         firstVC.backgroundImageView.image = UIImage(named: "onboardingBlue")
         firstVC.backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -23,7 +23,7 @@ class OnboardingPageViewController: UIPageViewController {
         pageControl.currentPageIndicatorTintColor = .black
         pageControl.pageIndicatorTintColor = .black.withAlphaComponent(0.3)
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-       return pageControl
+        return pageControl
     }()
     
     override init(transitionStyle style: UIPageViewController.TransitionStyle, navigationOrientation: UIPageViewController.NavigationOrientation, options: [UIPageViewController.OptionsKey : Any]? = nil) {
@@ -40,7 +40,11 @@ class OnboardingPageViewController: UIPageViewController {
         dataSource = self
         delegate = self
         
-        if let first = controllers.first {setViewControllers([first], direction: .forward, animated: true, completion: nil)}
+        guard let first = controllers.first else {return}
+        setViewControllers([first],
+                           direction: .forward,
+                           animated: true,
+                           completion: nil)
     }
     
     private func setUpView() {
@@ -55,7 +59,8 @@ class OnboardingPageViewController: UIPageViewController {
 
 extension OnboardingPageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let viewControllerIndex = controllers.firstIndex(of: viewController as! OnboardingViewController) else {
+        guard let onboardingViewController = viewController as? OnboardingViewController,
+              let viewControllerIndex = controllers.firstIndex(of: onboardingViewController) else {
             return nil
         }
         
@@ -68,7 +73,8 @@ extension OnboardingPageViewController: UIPageViewControllerDataSource {
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let viewControllerIndex = controllers.firstIndex(of: viewController as! OnboardingViewController) else {
+        guard let onboardingViewController = viewController as? OnboardingViewController,
+              let viewControllerIndex = controllers.firstIndex(of: onboardingViewController) else {
             return nil
         }
         
@@ -84,9 +90,11 @@ extension OnboardingPageViewController: UIPageViewControllerDataSource {
 
 extension OnboardingPageViewController: UIPageViewControllerDelegate {
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        if let currentVC = pageViewController.viewControllers?.first,
-           let currentIndex = controllers.firstIndex(of: currentVC as! OnboardingViewController) {
-            pageControl.currentPage = currentIndex
+        guard let currentVC = pageViewController.viewControllers?.first,
+              let onboardingViewController = currentVC as? OnboardingViewController,
+              let currentIndex = controllers.firstIndex(of: onboardingViewController) else {
+            return
         }
+        pageControl.currentPage = currentIndex
     }
 }
