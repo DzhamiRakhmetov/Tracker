@@ -2,7 +2,19 @@
 import Foundation
 import CoreData
 
-class TrackerCategoryStore: NSObject {
+// MARK: - Protocol
+
+protocol TrackerCategoryStoreProtocol {
+    func addCategory(category: String) throws
+    func deleteCategory(at indexPath: IndexPath) throws
+    func getCategoriesNames() -> [String]
+    func fetchNewCategory(with name: String) -> TrackerCategoryCoreData?
+    func fetchCategoryName(index: Int) -> String?
+}
+
+// MARK: - TrackerCategoryStore
+
+class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
     
     private let context: NSManagedObjectContext
     private let databaseManager = DatabaseManager.shared
@@ -32,11 +44,11 @@ class TrackerCategoryStore: NSObject {
         return fetchResultController
     }()
     
-    var numberOfCategories: Int {
+   private var numberOfCategories: Int {
         fetchResultController.fetchedObjects?.count ?? 0
     }
     
-    func numberOfRowsInSection(section: Int) -> Int {
+  private func numberOfRowsInSection(section: Int) -> Int {
         fetchResultController.fetchedObjects?[section].trackers?.count ?? 0
     }
     

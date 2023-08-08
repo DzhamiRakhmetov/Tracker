@@ -1,20 +1,22 @@
-//
-//  CategoriesViewController.swift
-//  Tracker
-//
-//  Created by Джами on 03.05.2023.
-//
-
 import UIKit
 
-protocol CategoriesViewControllerDelegate: AnyObject {
-    func selectCategory(_ string: String)
+// MARK: - Protocol
+protocol UICategoryListViewDelegate: AnyObject {
+    func didSelect(_ category: String)
 }
 
-final class CategoriesViewController: UIViewController {
-    weak var delegate: CategoriesViewControllerDelegate?
+// MARK: - UICategoryListView Class
+
+final class UICategoryListView: UIView {
+    weak var delegate: UICategoryListViewDelegate?
+    var didSelectCategory: (() -> ())?
+    var categories: [String] = [] {
+        didSet {
+            tableView.refreshControl?.endRefreshing()
+            tableView.reloadData()
+        }
+    }
     
-    private var categories = TrackerCategoryStore()
     private lazy var header: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -54,8 +56,7 @@ final class CategoriesViewController: UIViewController {
         return button
     }()
     
-    
-    private lazy var categoriesTableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.layer.cornerRadius = 16
@@ -67,54 +68,58 @@ final class CategoriesViewController: UIViewController {
         return tableView
     }()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .custom.white
-        setUpConstraints()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
     }
     
-    private func setUpConstraints() {
-        [header, stubImage, stubLabel, addCategoryButton, categoriesTableView].forEach {view.addSubview($0)}
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setup() {
+        [header, stubImage, stubLabel, addCategoryButton, tableView].forEach {self.addSubview($0)}
         
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
-            header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            header.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 20),
+            header.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             
-            categoriesTableView.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 38),
-            categoriesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            categoriesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            categoriesTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80),
+            tableView.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 38),
+            tableView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -80),
             
-            stubImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stubImage.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -30),
+            stubImage.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            stubImage.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor, constant: -30),
             
             stubLabel.topAnchor.constraint(equalTo: stubImage.bottomAnchor, constant: 8),
-            stubLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stubLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             
-            addCategoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            addCategoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            addCategoryButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20),
+            addCategoryButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -20),
+            addCategoryButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             addCategoryButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
-    @objc
-    func doneButtonClicked() {
-        let newCategoryViewController = NewCategoryViewController()
-        newCategoryViewController.delegate = self
-        present(newCategoryViewController, animated: true)
+    // MARK: - @objc func
+    
+    @objc func doneButtonClicked() {
+        didSelectCategory?()
     }
 }
 
-extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
+// MARK: - Extension
+
+extension UICategoryListView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.numberOfCategories
+        return categories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as? ButtonCell else {return UITableViewCell()}
-        let value = categories.fetchCategoryName(index: indexPath.row)
+        let value = categories[indexPath.row]
         
         cell.contentView.backgroundColor = .custom.backgroundDay
         cell.label.text = value
@@ -127,25 +132,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        guard let value = categories.fetchCategoryName(index: indexPath.row) else { return }
-        dismiss(animated: true) {
-            self.delegate?.selectCategory(value)
-        }
-    }
-}
-
-
-
-
-extension CategoriesViewController: NewCategoryViewControllerDelegate {
-    func setCategory(category: String?) {
-        guard let category = category else { return }
-        do {
-            try categories.addCategory(category: category)
-        } catch let error {
-            print(error.localizedDescription)
-        }
-        categories = TrackerCategoryStore()
-        categoriesTableView.reloadData()
+        let value = categories[indexPath.row]
+        delegate?.didSelect(value)
     }
 }

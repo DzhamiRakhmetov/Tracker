@@ -16,17 +16,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = TabBarController()
+        
+        let tabBarVC = TabBarController()
+        let onboardingVC = OnboardingPageViewController()
+        
+        if OnboardingManager.isOnboardingCompleted {
+            window.rootViewController = tabBarVC
+        } else {
+            window.rootViewController = onboardingVC
+        }
         self.window = window
         window.makeKeyAndVisible()
-        
-//        guard let scene = (scene as? UIWindowScene) else { return }
-//        let window = UIWindow(windowScene: scene)
-//        let viewController = TrackersViewController()
-//        let navigationController = UINavigationController(rootViewController: viewController)
-//        window.rootViewController = navigationController
-//        self.window = window
-//        window.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
