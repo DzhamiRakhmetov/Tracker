@@ -1,0 +1,45 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Dzhami on 08.08.2023.
+  
+*/
+
+// TrackersVC
+"Трекеры" = "Trackers";
+"Поиск" = "Search";
+"Что будем отслеживать?" = "What will we track?";
+"Фильтры" = "Filters";
+"Создание трекера" = "Tracker creation";
+"Статистика" = "Statistics";
+
+// TrackerCreationVC
+"Категория" = "Category";
+"Расписание" = "Schedule";
+"Привычка" = "Habbit";
+"Нерегулярное событие" = "New irregular action";
+"Введите название трекера" = "Enter tracker name";
+"Цвет" = "Color";
+"Отменить" = "Cancel";
+"Создать" = "Create";
+"Ограничение 38 символов" = "38 character limit";
+
+//ScheduleViewController
+"Готово" = "Done";
+
+//NewCategoryViewController
+"Введите название категории" = "Enter category name";
+
+//UICategoryListView
+"Привычки и события можно \n объединить по смыслу" = "Habits and events can \n be combined in meaning";
+"Добавить категорию" = "Add category";
+
+
+// Onboarding
+"Отслеживайте только то, что хотите" = "Track only what you want";
+"Даже если это\nне литры воды и йога" = "Even if it's not liters of water and yoga";
+"Вот это технологии!" = "That's technology!";
+
+"Редактировать" = "Edit";
+"Удалить" = "Delete";

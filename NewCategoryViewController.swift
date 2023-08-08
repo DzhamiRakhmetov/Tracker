@@ -17,7 +17,7 @@ final class NewCategoryViewController: UIViewController {
     private lazy var categoryLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Категория"
+        label.text = "Категория".localized()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
@@ -35,7 +35,7 @@ final class NewCategoryViewController: UIViewController {
         textFiled.enablesReturnKeyAutomatically = true      // "Готово" недоступно пока пользователь не ввел текст
         textFiled.smartInsertDeleteType = .no              // запрет вставки
         textFiled.indent(size: 16)
-        textFiled.placeholder = "Введите название категории"
+        textFiled.placeholder = "Введите название категории".localized()
         textFiled.font = UIFont.systemFont(ofSize: 17)
         
         return textFiled
@@ -46,7 +46,7 @@ final class NewCategoryViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
-        button.setTitle("Готово", for: .normal)
+        button.setTitle("Готово".localized(), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .custom.gray
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)

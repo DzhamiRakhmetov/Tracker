@@ -20,7 +20,7 @@ final class UICategoryListView: UIView {
     private lazy var header: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Категория"
+        label.text = "Категория".localized()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
@@ -48,7 +48,7 @@ final class UICategoryListView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle("Добавить категорию".localized(), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)

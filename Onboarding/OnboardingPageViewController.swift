@@ -5,12 +5,12 @@ class OnboardingPageViewController: UIPageViewController {
     
     private lazy var controllers: [OnboardingViewController] = {
         let firstVC = OnboardingViewController()
-        firstVC.onboardingLabel.text = "Отслеживайте только то, что хотите"
+        firstVC.onboardingLabel.text = "Отслеживайте только то, что хотите".localized()
         firstVC.backgroundImageView.image = UIImage(named: "onboardingBlue")
         firstVC.backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         
         let secondVC = OnboardingViewController()
-        secondVC.onboardingLabel.text = "Даже если это\nне литры воды и йога"
+        secondVC.onboardingLabel.text = "Даже если это\nне литры воды и йога".localized()
         secondVC.backgroundImageView.image = UIImage(named: "onboardingRed")
         secondVC.backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         return [firstVC, secondVC]

@@ -116,28 +116,29 @@ final class TrackerCell: UICollectionViewCell {
         
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
-        dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
+//        dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
+        dayCounterLabel.text = String.localizedStringWithFormat(NSLocalizedString("completedDays", comment: "Число дней"), completedDays)
         
         let image = isCompletedToday ? setDoneImage() : setPlusImage()
        // setDayCounterButton(is: isCompletedToday)
     
     }
     
-    private func dayString(for count: Int) -> String {
-        let mod10 = count % 10
-        let mod100 = count % 100
-        let not10To20 = mod100 < 10 || mod100 > 20
-        
-        if count == 0 {
-            return "дней"
-        } else if mod10 == 1 && not10To20 {
-            return "день"
-        } else if (mod10 >= 2 && mod10 <= 4) && not10To20 {
-            return "дня"
-        } else {
-            return "дней"
-        }
-    }
+//    private func dayString(for count: Int) -> String {
+//        let mod10 = count % 10
+//        let mod100 = count % 100
+//        let not10To20 = mod100 < 10 || mod100 > 20
+//        
+//        if count == 0 {
+//            return "дней"
+//        } else if mod10 == 1 && not10To20 {
+//            return "день"
+//        } else if (mod10 >= 2 && mod10 <= 4) && not10To20 {
+//            return "дня"
+//        } else {
+//            return "дней"
+//        }
+//    }
     
     
     private func setUpConstraints() {
@@ -196,11 +197,11 @@ extension TrackerCell: UIContextMenuInteractionDelegate {
         
         return UIContextMenuConfiguration(actionProvider: { actions in
             return UIMenu(children: [
-                UIAction(title: "Редактировать", image: editImage) { [weak self] _ in
+                UIAction(title: "Редактировать".localized(), image: editImage) { [weak self] _ in
                     guard let self = self else { return }
                     //   self.editTracker(cell: self)
                 },
-                UIAction(title: "Удалить", image: deleteImage, attributes: .destructive) { [weak self] _ in
+                UIAction(title: "Удалить".localized(), image: deleteImage, attributes: .destructive) { [weak self] _ in
                     guard let self = self, let indexPath = indexPath else { return }
                     delegate?.deleteTracker(at: indexPath)
                 }

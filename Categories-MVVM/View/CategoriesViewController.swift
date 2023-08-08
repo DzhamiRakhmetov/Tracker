@@ -39,12 +39,12 @@ final class CategoriesViewController: UIViewController {
         categoryView.didSelectCategory = doneButtonClicked
         categoryView.delegate = self
         
-        NSLayoutConstraint.activate([
-            categoryView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            categoryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            categoryView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            categoryView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
+//        NSLayoutConstraint.activate([
+//            categoryView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+//            categoryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+//            categoryView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            categoryView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//        ])
     }
     
     func doneButtonClicked() -> Void {

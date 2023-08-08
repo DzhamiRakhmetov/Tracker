@@ -27,7 +27,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var header: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Трекеры"
+        label.text = "Трекеры".localized()
         label.textColor = .custom.black
         label.font = UIFont.boldSystemFont(ofSize: 34)
         return label
@@ -36,7 +36,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var searchField: UISearchTextField = {
         let searchField = UISearchTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
-        searchField.placeholder = "Поиск"
+        searchField.placeholder = "Поиск".localized()
         searchField.font = UIFont.systemFont(ofSize: 17)
         searchField.delegate = self
         searchField.addTarget(self, action: #selector(searchChanged(_:)), for: .editingChanged)
@@ -54,7 +54,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var stubLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Что будем отслеживать?"
+        label.text = "Что будем отслеживать?".localized()
         label.font = UIFont.systemFont(ofSize: 12)
         return label
     }()
@@ -64,7 +64,8 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
-        datePicker.locale = Locale(identifier: "ru_RU")
+//        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.locale = .current
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
         return datePicker
     }()
@@ -90,7 +91,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Фильтры", for: .normal)
+        button.setTitle("Фильтры".localized(), for: .normal)
         button.backgroundColor = .custom.blue
         button.tintColor = .custom.white
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17)

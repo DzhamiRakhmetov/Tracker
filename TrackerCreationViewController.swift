@@ -11,7 +11,7 @@ protocol TrackerStoreProtocol: AnyObject {
 
 final class TrackerCreationViewController: UIViewController {
     
-    var dataForTableView = ["Категория", "Расписание"]
+    var dataForTableView = ["Категория".localized(), "Расписание".localized()]
     var trackerStore: TrackerStoreProtocol?
     var trackerType: TrackerType?
     let scheduleService = ScheduleService()
@@ -49,9 +49,9 @@ final class TrackerCreationViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         if trackerType == .regular {
-            label.text = "Новая привычка"
+            label.text = "Новая привычка".localized()
         } else {
-            label.text = "Новое нерегулярное действие"
+            label.text = "Новое нерегулярное действие".localized()
         }
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -64,7 +64,7 @@ final class TrackerCreationViewController: UIViewController {
         textFiled.translatesAutoresizingMaskIntoConstraints = false
         textFiled.layer.cornerRadius = 16
         textFiled.layer.masksToBounds = true
-        textFiled.placeholder = "Введите название трекера"
+        textFiled.placeholder = "Введите название трекера".localized()
         textFiled.backgroundColor = .custom.backgroundDay
         textFiled.clearButtonMode = .whileEditing
         textFiled.isUserInteractionEnabled = true
@@ -114,7 +114,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Цвет"
+        label.text = "Цвет".localized()
         label.font = UIFont.boldSystemFont(ofSize: 19)
         return label
     }()
@@ -140,7 +140,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle("Отменить".localized(), for: .normal)
         button.setTitleColor(.custom.red, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.backgroundColor = .custom.white
@@ -155,7 +155,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var createButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Создать", for: .normal)
+        button.setTitle("Создать".localized(), for: .normal)
         button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.backgroundColor = .custom.gray
@@ -168,7 +168,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var charactersLimitLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Ограничение 38 символов"
+        label.text = "Ограничение 38 символов".localized()
         label.font = UIFont.systemFont(ofSize: 17)
         label.textColor = .custom.red
         label.alpha = 0.0 // непрозрачныйу
