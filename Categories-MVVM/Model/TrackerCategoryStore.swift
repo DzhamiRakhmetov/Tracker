@@ -10,6 +10,7 @@ protocol TrackerCategoryStoreProtocol {
     func getCategoriesNames() -> [String]
     func fetchNewCategory(with name: String) -> TrackerCategoryCoreData?
     func fetchCategoryName(index: Int) -> String?
+    func changeCategoryName(at indexPath: IndexPath, to newName: String)
 }
 
 // MARK: - TrackerCategoryStore
@@ -69,8 +70,15 @@ class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
         try context.save()
     }
     
+    func changeCategoryName(at indexPath: IndexPath, to newName: String) {
+        let categoryCoreData = fetchResultController.object(at: indexPath)
+        categoryCoreData.title = newName
+        try? context.save()
+    }
+    
     func getCategoriesNames() -> [String] {
-        fetchResultController.fetchedObjects?.map { $0.title ?? "" } ?? []
+     try?   fetchResultController.performFetch()
+      return  fetchResultController.fetchedObjects?.map { $0.title ?? "" } ?? []
     }
     
     func fetchCategoryName(index: Int) -> String? {

@@ -64,6 +64,18 @@ class TrackerStore: NSObject {
         }
     }
     
+    
+    func pinTracker(at indexPath: IndexPath, isPinned: Bool) {
+        let pinnedTrackerCoreData = fetchResultController.object(at: indexPath)
+         pinnedTrackerCoreData.isPinned = isPinned
+        do {
+            try context.save()
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+
     func fetchTrackers() -> [TrackerCategory] {
         guard let sections = fetchResultController.sections else { return [] }
 
@@ -78,7 +90,8 @@ class TrackerStore: NSObject {
                                                      name: tracker.name ?? "",
                                                      color: UIColorMarshalling.deserialize(hexString: tracker.color ?? "")!,
                                                      emoji: tracker.emoji ?? "",
-                                                     schedule: tracker.schedule))
+                                                 schedule: tracker.schedule,
+                                                 isPinned: tracker.isPinned))
             }
             currentCategory.append(category)
         }
@@ -121,7 +134,7 @@ class TrackerStore: NSObject {
                        name: name,
                        color: color,
                        emoji: emoji,
-                       schedule: scheduleInt)
+                       schedule: scheduleInt, isPinned: trackerCoreData.isPinned)
     }
     
 }

@@ -41,6 +41,10 @@ extension CategoriesViewModel: CategoriesViewModelProtocol {
         }
         updateCategories()
     }
+    
+    func changeCategoryName(at indexPath: IndexPath, to newName: String) {
+        categoryStore.changeCategoryName(at: indexPath, to: newName)
+    }
 }
 
 // MARK: - Output

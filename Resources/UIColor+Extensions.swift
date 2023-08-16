@@ -20,6 +20,11 @@ extension UIColor {
         var gray: UIColor { return UIColor(named: NameColor.gray.rawValue) ?? UIColor.gray }
         var white: UIColor { return UIColor(named: NameColor.white.rawValue) ?? UIColor.white }
         var black: UIColor { return UIColor(named: NameColor.black.rawValue) ?? UIColor.black }
+         let viewBackgroundColor = UIColor.systemBackground
+        
+         var firstGradientColor: UIColor { UIColor(named: "FirstGradientColor") ?? .systemRed }
+         var secondGradientColor: UIColor { UIColor(named: "SecondGradientColor") ?? .systemGreen }
+         var thirdGradientColor: UIColor { UIColor(named: "ThirdGradientColor") ?? .systemBlue }
         
         var colorSelection1: UIColor { return UIColor(named: SelectionColor.ColorSelection1.rawValue) ?? UIColor.white }
         var colorSelection2: UIColor { return UIColor(named: SelectionColor.ColorSelection2.rawValue) ?? UIColor.white }

@@ -5,6 +5,7 @@ import UIKit
 
 protocol NewCategoryViewControllerDelegate: AnyObject {
     func setCategory(category: String?)
+    func updateTableView()
 }
 
 // MARK: - final class NewCategoryViewController
@@ -80,6 +81,11 @@ final class NewCategoryViewController: UIViewController {
         ])
     }
     
+    func edit(_ category: String) {
+        newCategoryName = category
+        categoryNameTextFiled.becomeFirstResponder()
+    }
+    
     func enableDoneButton(){
         doneButton.backgroundColor = .custom.black
         doneButton.isUserInteractionEnabled = true
@@ -96,6 +102,7 @@ final class NewCategoryViewController: UIViewController {
         dismiss(animated: true) {
             print("New Category - \(String(describing: self.newCategoryName))")
             self.delegate?.setCategory(category: text)
+            self.delegate?.updateTableView()
             self.disableDoneButton()
             self.newCategoryName = nil
             self.categoryNameTextFiled.text = nil

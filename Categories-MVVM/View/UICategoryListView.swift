@@ -3,11 +3,13 @@ import UIKit
 // MARK: - Protocol
 protocol UICategoryListViewDelegate: AnyObject {
     func didSelect(_ category: String)
+    func didDelete(at index: IndexPath)
 }
 
 // MARK: - UICategoryListView Class
 
 final class UICategoryListView: UIView {
+    
     weak var delegate: UICategoryListViewDelegate?
     var didSelectCategory: (() -> ())?
     var categories: [String] = [] {
@@ -56,7 +58,7 @@ final class UICategoryListView: UIView {
         return button
     }()
     
-    private lazy var tableView: UITableView = {
+     lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.layer.cornerRadius = 16
@@ -71,6 +73,7 @@ final class UICategoryListView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
+
     }
     
     required init?(coder: NSCoder) {
@@ -102,6 +105,12 @@ final class UICategoryListView: UIView {
         ])
     }
     
+    private func checkForStub() {
+        stubImage.isHidden = categories.count > 0
+        stubLabel.isHidden = categories.count > 0
+        tableView.isHidden = categories.count == 0
+    }
+    
     // MARK: - @objc func
     
     @objc func doneButtonClicked() {
@@ -123,6 +132,7 @@ extension UICategoryListView: UITableViewDelegate, UITableViewDataSource {
         
         cell.contentView.backgroundColor = .custom.backgroundDay
         cell.label.text = value
+        
         return cell
     }
     
@@ -134,5 +144,20 @@ extension UICategoryListView: UITableViewDelegate, UITableViewDataSource {
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         let value = categories[indexPath.row]
         delegate?.didSelect(value)
+    }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(actionProvider: { [weak self] actions in
+            return UIMenu(children: [
+                UIAction(title: "Редактировать".localized()) {_ in
+                  
+                },
+                UIAction(title: "Удалить".localized(), attributes: .destructive) { _ in
+                    self?.delegate?.didDelete(at: indexPath)
+                    
+
+                }
+            ])
+        })
     }
 }

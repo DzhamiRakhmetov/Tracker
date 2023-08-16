@@ -6,6 +6,7 @@ import UIKit
 enum TrackerType {
     case regular
     case irregular
+    case existing
 }
 
 // MARK: - final class TrackerTypeViewController
@@ -84,16 +85,14 @@ final class TrackerTypeViewController: UIViewController {
     // MARK: - @objc func
     
     @objc func irregularButtonClicked() {
-        let vc = TrackerCreationViewController()
-        vc.trackerType = .irregular
+        let vc = TrackerCreationViewController(trackerType: .irregular)
         vc.trackerStore = self
         present(vc, animated: true)
     }
     
     @objc
     func regularButtonClicked() {
-        let vc = TrackerCreationViewController()
-        vc.trackerType = .regular
+        let vc = TrackerCreationViewController(trackerType: .regular)
         vc.trackerStore = self
         present(vc, animated: true)
     }

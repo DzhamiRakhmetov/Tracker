@@ -39,6 +39,7 @@ final class CategoriesViewController: UIViewController {
         categoryView.didSelectCategory = doneButtonClicked
         categoryView.delegate = self
         
+        
 //        NSLayoutConstraint.activate([
 //            categoryView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
 //            categoryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
@@ -57,6 +58,10 @@ final class CategoriesViewController: UIViewController {
 // MARK: - Extensions
 
 extension CategoriesViewController: NewCategoryViewControllerDelegate {
+    func updateTableView() {
+        categoryView.tableView.reloadData()
+    }
+    
     func setCategory(category: String?) {
         viewModel.setCategory(category: category)
     }
@@ -65,10 +70,35 @@ extension CategoriesViewController: NewCategoryViewControllerDelegate {
 extension CategoriesViewController: CategoriesViewModelDelegate {
     func reloadDataCategories(_ array: [String]) {
         categoryView.categories = array
+        categoryView.tableView.reloadData()
     }
 }
 
 extension CategoriesViewController: UICategoryListViewDelegate {
+    
+    func didDelete(at index: IndexPath) {
+        let alert = UIAlertController(
+            title: nil,
+            message: "Эта категория точно не нужна?",
+            preferredStyle: .actionSheet)
+        
+        let deleteAction = UIAlertAction(
+            title: "Удалить",
+            style: .destructive) { [weak self] _ in
+                
+                guard let self = self else { return }
+                viewModel.deleteCategory(at: index)
+            }
+        
+        let cancelAction = UIAlertAction(
+            title: "Отменить",
+            style: .cancel)
+        
+        alert.addAction(cancelAction)
+        alert.addAction(deleteAction)
+        present(alert, animated: true)
+    }
+    
     func didSelect(_ category: String) {
         delegate?.selectCategory(category)
         dismiss(animated: true) {}

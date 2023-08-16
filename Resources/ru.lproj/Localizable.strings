@@ -14,6 +14,8 @@
 "Filters" = "Фильтры";
 "Tracker creation" = "Создание трекера";
 "Statistics" = "Статистика";
+"Pin" = "Закрепить";
+"Unpin" = "Открепить";
 
 // TrackerCreationVC
 "Category" = "Категория";
@@ -44,3 +46,7 @@
 
 "Edit" = "Редактировать";
 "Delete" = "Удалить";
+
+// Statistics
+"There is nothing to analyze yet" = "Анализировать пока нечего";
+"Completed trackers" = "Трекеров завершено";
