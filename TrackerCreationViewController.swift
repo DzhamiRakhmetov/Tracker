@@ -326,7 +326,7 @@ final class TrackerCreationViewController: UIViewController {
         trackerID = tracker.id
         self.isPinned = isPinned
         let daysTitle = String.localizedStringWithFormat(NSLocalizedString("completedDays", comment: "Число дней"))
-        daysCounterLabel.text = "\(dayCounter) " + daysTitle
+        daysCounterLabel.text = "\(dayCounter) " 
     }
     
     

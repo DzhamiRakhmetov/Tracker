@@ -54,9 +54,11 @@ class TrackerStore: NSObject {
         }
     }
     
-    func deleteTracker(at indexPath: IndexPath) throws {
-        let trackerCoreData = fetchResultController.object(at: indexPath)
-        context.delete(trackerCoreData)
+    func deleteTracker(tracker: Tracker) throws {
+        guard let objects = fetchResultController.fetchedObjects,
+              let selectedTracker = objects.first(where: { tracker.id == $0.id }) else { return }
+        
+        context.delete(selectedTracker)
         do {
             try context.save()
         } catch let error {
@@ -64,10 +66,11 @@ class TrackerStore: NSObject {
         }
     }
     
-    
-    func pinTracker(at indexPath: IndexPath, isPinned: Bool) {
-        let pinnedTrackerCoreData = fetchResultController.object(at: indexPath)
-         pinnedTrackerCoreData.isPinned = isPinned
+    func pinTracker(tracker : Tracker) {
+        guard let objects = fetchResultController.fetchedObjects,
+              let selectedTracker = objects.first(where: { tracker.id == $0.id }) else { return }
+        
+        selectedTracker.isPinned = !tracker.isPinned
         do {
             try context.save()
         } catch let error {
@@ -75,15 +78,20 @@ class TrackerStore: NSObject {
         }
     }
     
-
     func fetchTrackers() -> [TrackerCategory] {
         guard let sections = fetchResultController.sections else { return [] }
 
         var currentCategory: [TrackerCategory] = []
 
         for section in sections {
-            guard let object = section.objects as? [TrackerCoreData] else { return [] }
-            var category = TrackerCategory(title: section.name, trackers: [] )
+            guard let object = section.objects as? [TrackerCoreData] else { return [] } // section.isPinned
+            
+            var isPinned = false
+                 if let firstObject = object.first {
+                     isPinned = firstObject.isPinned
+                 }
+            
+            var category = TrackerCategory(title: section.name, trackers: [], isPinnedCategory: isPinned )
 
             for tracker in object {
                 category.trackers.append(Tracker(id: tracker.id ?? UUID(),
@@ -97,13 +105,14 @@ class TrackerStore: NSObject {
         }
         return currentCategory
     }
+
     
-    // add func to get all trackers or specific tracker
-    
-    func getTrackerAt(indexPath: IndexPath) -> Tracker? {
-           let trackerCoreData = fetchResultController.object(at: indexPath)
+    func getTrackerAt(tracker: Tracker) -> Tracker? {
+        guard let objects = fetchResultController.fetchedObjects,
+              let selectedTracker = objects.first(where: { tracker.id == $0.id }) else { return nil }
+
            do {
-               let tracker = try makeTracker(from: trackerCoreData)
+               let tracker = try makeTracker(from: selectedTracker)
                return tracker
            } catch {
                return nil
@@ -137,6 +146,36 @@ class TrackerStore: NSObject {
                        schedule: scheduleInt, isPinned: trackerCoreData.isPinned)
     }
     
+    
+    //    func deleteTracker(at indexPath: IndexPath) throws {
+    //        let trackerCoreData = fetchResultController.object(at: indexPath)
+    //        context.delete(trackerCoreData)
+    //        do {
+    //            try context.save()
+    //        } catch let error {
+    //            print(error.localizedDescription)
+    //        }
+    //    }
+    
+//    func pinTracker(at indexPath: IndexPath, isPinned: Bool) {
+//        let pinnedTrackerCoreData = fetchResultController.object(at: indexPath)
+//         pinnedTrackerCoreData.isPinned = isPinned
+//        do {
+//            try context.save()
+//        } catch let error {
+//            print(error.localizedDescription)
+//        }
+//    }
+    
+//    func getTrackerAt(indexPath: IndexPath) -> Tracker? {
+//           let trackerCoreData = fetchResultController.object(at: indexPath)
+//           do {
+//               let tracker = try makeTracker(from: trackerCoreData)
+//               return tracker
+//           } catch {
+//               return nil
+//           }
+//       }
 }
 
 // MARK: - Extensions

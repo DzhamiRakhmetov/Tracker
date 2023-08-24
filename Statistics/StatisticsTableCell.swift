@@ -14,7 +14,7 @@ final class StatisticsTableCell: UITableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
-        view.backgroundColor = UIColor.systemBackground
+        view.backgroundColor = .custom.white
         return view
     }()
     

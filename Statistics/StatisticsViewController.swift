@@ -35,21 +35,20 @@ final class StatisticsViewController: UIViewController {
         tableView.register(StatisticsTableCell.self, forCellReuseIdentifier: "StatisticsTableCell")
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.backgroundColor = .custom.white
         return tableView
     }()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .custom.viewBackgroundColor
+        view.backgroundColor = .custom.white
         setupConstraints()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tableView.reloadData()
-
-     
+        tableView.reloadData()     
     }
     
     private func setupConstraints() {

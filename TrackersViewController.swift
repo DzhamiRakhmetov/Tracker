@@ -7,10 +7,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     var completedTrackers: [TrackerRecord]
     var visibleCategories: [TrackerCategory]
     var trackerStore: TrackerStore
+    var trackerCategoryStore: TrackerCategoryStore
     var trackerRecordStore: TrackerRecordStore
-    var currentDate: Date = .init()
-    var pinnedTrackers : [Tracker] = []
-
+    private var currentDate: Date = .init()
+    private var today: Date { Date().startOfDay }
+    
     
     private let analyticsService = AnalyticsService()
     private var selectedFilter: Filter?
@@ -66,7 +67,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
-        //        datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.locale = .current
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
         return datePicker
@@ -115,12 +115,14 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         completedTrackers: [TrackerRecord] = [], // viewModel
         visibleCategories: [TrackerCategory] = [], // viewModel
         trackerStore: TrackerStore = TrackerStore(), // viewModel
+        trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore(),
         trackerRecordStore: TrackerRecordStore = TrackerRecordStore()
     ) {
         self.categoryStore = categories
         self.completedTrackers = completedTrackers
         self.visibleCategories = visibleCategories
         self.trackerStore = trackerStore
+        self.trackerCategoryStore = trackerCategoryStore
         self.trackerRecordStore = trackerRecordStore
         super.init(nibName: nil, bundle: nil)
     }
@@ -131,7 +133,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .custom.viewBackgroundColor
+        view.backgroundColor = .custom.white
         setUpConstraints()
         reloadData()
     }
@@ -193,6 +195,16 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         dateChanged(datePicker)
     }
     
+    private func loadPinnedTrackers() -> [Tracker] {
+        
+        var pinnedTrackers: [Tracker] = []
+        trackerStore.fetchTrackers().forEach({ category in
+            
+            let trackers = category.trackers.filter { $0.isPinned }
+            pinnedTrackers.append(contentsOf: trackers)
+        })
+        return pinnedTrackers
+    }
     
     private func reloadVisibleCategories(text: String?, date: Date) {
         let calendar = Calendar.current
@@ -215,10 +227,17 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             if trackers.isEmpty {
                 return nil
             }
-            pinnedTrackers = trackers.filter{ $0.isPinned }
-            
-            return TrackerCategory(title: category.title, trackers: trackers)
+            return TrackerCategory(title: category.title, trackers: trackers, isPinnedCategory: category.isPinnedCategory)
         }
+        
+        let pinnedTrackers = loadPinnedTrackers()
+        if  !pinnedTrackers.isEmpty {
+            
+            let category = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers, isPinnedCategory: true)
+            
+            visibleCategories.insert(category, at: 0)
+        }
+        
         collectionView.reloadData()
     }
     
@@ -243,12 +262,17 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     @objc private func dateChanged(_ picker: UIDatePicker) {
         currentDate = datePicker.date.startOfDay
+        
+        if currentDate == today {
+            selectedFilter = .today
+        } else {
+            selectedFilter = .all
+        }
         reloadVisibleCategories(text: searchField.text, date: picker.date)
     }
     
     @objc private func searchChanged(_ search: UISearchTextField) {
         reloadVisibleCategories(text: search.text, date: datePicker.date)
-        
     }
 }
 
@@ -263,9 +287,7 @@ extension TrackersViewController: UITextFieldDelegate {
     }
 }
 
-extension TrackersViewController: UICollectionViewDelegateFlowLayout {
-    
-}
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {}
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegate
 
@@ -273,39 +295,23 @@ extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        if section == 0 && !pinnedTrackers.isEmpty {
-            return pinnedTrackers.count
-        }
-        
-        let index = !pinnedTrackers.isEmpty ? section - 1 : section
-        let count = visibleCategories[index].trackers.count
+        let count = visibleCategories[section].trackers.count
         return count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-    
+        
         var count = visibleCategories.count
         isHiddenPlacholder = count > 0
         filterButton.isHidden = count == 0
         
-        if !pinnedTrackers.isEmpty {
-         count += 1
-        }
         return count
     }
     
     
     fileprivate func setupCell(_ indexPath: IndexPath, _ cell: TrackerCell) {
         
-        // guard let tracker = trackerStore.fetchResultController.fetchedObjects?[indexPath.section] else {return}
-        let tracker : Tracker
-        
-        if indexPath.section == 0 && !pinnedTrackers.isEmpty {
-            tracker = pinnedTrackers[indexPath.row]
-        } else {
-            let index = !pinnedTrackers.isEmpty ? indexPath.section - 1 : indexPath.section
-           tracker = visibleCategories[index].trackers[indexPath.row]
-        }
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
         
         cell.delegate = self
         let id = tracker.id
@@ -339,15 +345,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderSectionView", for: indexPath) as? HeaderSectionView
         else {return UICollectionReusableView()}
         
-        let titileCategory: String
-        
-        if indexPath.section == 0 && !pinnedTrackers.isEmpty {
-            titileCategory = "Закрепленные"
-        } else {
-            let index = !pinnedTrackers.isEmpty ? indexPath.section - 1 : indexPath.section
-            
-            titileCategory = categoryStore.fetchCategoryName(index: index) ?? "---"
-        }
+        let titileCategory  = visibleCategories[indexPath.section].title
         
         view.setTitle(text: titileCategory)
         return view
@@ -371,37 +369,31 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: TrackerCellDelegate {
     
     func pinTrackerTapped(at indexPath: IndexPath) {
-        
-        let tracker : Tracker
-        if indexPath.section == 0 && !pinnedTrackers.isEmpty {
-            tracker = pinnedTrackers[indexPath.row]
-        } else {
-            tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
-        }
-        
-        if tracker.isPinned {
-            // сохранить с новым свойством в хранилище
-            pinnedTrackers.removeAll{ $0.id == tracker.id }
-        } else {
-            pinnedTrackers.append(tracker)
-        }
-        trackerStore.pinTracker(at: indexPath, isPinned: !tracker.isPinned)
+
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
+
+        trackerStore.pinTracker(tracker: tracker)
         reloadVisibleCategories(text: searchField.text, date: datePicker.date)
     }
     
+    
     func editTracker(at indexPath: IndexPath) {
         
-//        guard let tracker = trackerStore.getTrackerAt(indexPath: indexPath) else { return }
-//              let category = trackerStore.
-//        let dayCounter =
-//
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
+        
+        guard let tracker = trackerStore.getTrackerAt(tracker: tracker),
+              let category = trackerCategoryStore.categoryStringForTracker(at: indexPath) else { return }
+        let dayCounter = trackerRecordStore.fetchTrackerRecords().count
+        
         let editVC = TrackerCreationViewController(trackerType: .existing)
-//        editVC.edit(existing: tracker, in: category, with: dayCounter, isPinned: tracker.isPinned)
-   
+        
+        editVC.edit(existing: tracker, in: category, with: dayCounter, isPinned: tracker.isPinned)
+        
         present(editVC, animated: true)
     }
     
     func deleteTracker(at indexPath: IndexPath) {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
         let alert = UIAlertController(
             title: nil,
             message: NSLocalizedString("Уверены что хотите удалить трекер?", comment: ""),
@@ -413,7 +405,7 @@ extension TrackersViewController: TrackerCellDelegate {
                 
                 guard let self = self else { return }
                 do {
-                    try self.trackerStore.deleteTracker(at: indexPath)
+                    try self.trackerStore.deleteTracker(tracker: tracker)
                     reloadData()
                     collectionView.reloadData()
                 } catch { }
@@ -479,18 +471,21 @@ extension TrackersViewController: TrackerStoreProtocol {
 extension TrackersViewController: FiltersViewControllerDelegate {
     
     func filterSelected(filter: Filter) {
-        //        selectedFilter = filter
-        //
-        //        switch filter {
-        //        case .all:
-        //
-        //        case.completed:
-        //
-        //        case .today:
-        //
-        //        case .uncompleted:
-        //
-        //        }
+//                selectedFilter = filter
+//        
+//                switch filter {
+//                case .all:
+//                    trackerStore.fetchTrackers()
+//                case.completed:
+//                    trackerRecordStore.fetchTrackerRecords()
+//        
+//                case .today:
+//                    datePicker.date = today
+//                    currentDate = today
+//        
+//                case .uncompleted:
+//                    trackerRecordStore.fetchTrackerRecords()
+//                }
     }
 }
 

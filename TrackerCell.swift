@@ -35,7 +35,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 16)
-        label.backgroundColor = .custom.white.withAlphaComponent(0.3)
+        label.backgroundColor = .white.withAlphaComponent(0.3)
         label.layer.cornerRadius = 12
         label.layer.masksToBounds = true
         label.textAlignment = .center
@@ -46,7 +46,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .custom.white
+        label.textColor = .white
         label.numberOfLines = 0
         return label
     }()
@@ -55,6 +55,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12)
+        label.textColor = .custom.ypBlack
         return label
     }()
     
@@ -131,7 +132,6 @@ final class TrackerCell: UICollectionViewCell {
         
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
-        //        dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
         dayCounterLabel.text = String.localizedStringWithFormat(NSLocalizedString("completedDays", comment: "Число дней"), completedDays)
         
         let image = isCompletedToday ? setDoneImage() : setPlusImage()

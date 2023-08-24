@@ -38,20 +38,17 @@ final class CategoriesViewController: UIViewController {
         categoryView.translatesAutoresizingMaskIntoConstraints = false
         categoryView.didSelectCategory = doneButtonClicked
         categoryView.delegate = self
-        
-        
-//        NSLayoutConstraint.activate([
-//            categoryView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-//            categoryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-//            categoryView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            categoryView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//        ])
     }
     
     func doneButtonClicked() -> Void {
         let newCategoryViewController = NewCategoryViewController()
         newCategoryViewController.delegate = self
         present(newCategoryViewController, animated: true)
+    }
+    
+    private func switchToEditingVC() {
+        let editingVC = EditCategoryViewController()
+        present(editingVC, animated: true)
     }
 }
 
@@ -76,14 +73,20 @@ extension CategoriesViewController: CategoriesViewModelDelegate {
 
 extension CategoriesViewController: UICategoryListViewDelegate {
     
+    func editCategory(at indexPath: IndexPath) {
+        switchToEditingVC()
+        viewModel.editCategory(at: indexPath)
+    }
+    
+    
     func didDelete(at index: IndexPath) {
         let alert = UIAlertController(
             title: nil,
-            message: "Эта категория точно не нужна?",
+            message: "Эта категория точно не нужна?".localized(),
             preferredStyle: .actionSheet)
         
         let deleteAction = UIAlertAction(
-            title: "Удалить",
+            title: "Удалить".localized(),
             style: .destructive) { [weak self] _ in
                 
                 guard let self = self else { return }

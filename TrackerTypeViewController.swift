@@ -19,6 +19,7 @@ final class TrackerTypeViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Создание трекера".localized()
+        label.textColor = .custom.ypBlack
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
@@ -31,7 +32,8 @@ final class TrackerTypeViewController: UIViewController {
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
         button.setTitle("Привычка".localized(), for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .custom.ypBlack
+        button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.addTarget(self, action: #selector(regularButtonClicked), for: .touchUpInside)
         return button
@@ -44,7 +46,8 @@ final class TrackerTypeViewController: UIViewController {
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
         button.setTitle("Нерегулярное событие".localized(), for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .custom.ypBlack
+        button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.addTarget(self, action: #selector(irregularButtonClicked), for: .touchUpInside)
         return button

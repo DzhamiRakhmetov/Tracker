@@ -4,6 +4,8 @@ import UIKit
 protocol UICategoryListViewDelegate: AnyObject {
     func didSelect(_ category: String)
     func didDelete(at index: IndexPath)
+//    func didDelete (_ category: String)
+    func editCategory(at indexPath: IndexPath)
 }
 
 // MARK: - UICategoryListView Class
@@ -150,12 +152,12 @@ extension UICategoryListView: UITableViewDelegate, UITableViewDataSource {
         return UIContextMenuConfiguration(actionProvider: { [weak self] actions in
             return UIMenu(children: [
                 UIAction(title: "Редактировать".localized()) {_ in
-                  
+                    self?.delegate?.editCategory(at: indexPath)
+                    
+                   
                 },
                 UIAction(title: "Удалить".localized(), attributes: .destructive) { _ in
                     self?.delegate?.didDelete(at: indexPath)
-                    
-
                 }
             ])
         })

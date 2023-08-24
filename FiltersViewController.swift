@@ -17,6 +17,7 @@ final class FiltersViewController: UIViewController {
         label.text = "Фильтры"
         label.font =  UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
+        label.textColor = .custom.ypBlack
         return label
     }()
     
