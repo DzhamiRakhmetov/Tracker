@@ -19,7 +19,7 @@ final class ScheduleViewController: UIViewController {
     private lazy var headerTitile: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Расписание"
+        label.text = "Расписание".localized()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
@@ -30,7 +30,7 @@ final class ScheduleViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
-        button.setTitle("Готово", for: .normal)
+        button.setTitle("Готово".localized(), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)

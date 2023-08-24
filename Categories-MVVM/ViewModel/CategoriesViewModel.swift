@@ -19,7 +19,17 @@ final class CategoriesViewModel {
 
 // MARK: - Input 
 extension CategoriesViewModel: CategoriesViewModelProtocol {
+    
     func viewDidLoad() {
+        updateCategories()
+    }
+    
+    func deleteCategory(at indexPath: IndexPath) {
+        do {
+            try categoryStore.deleteCategory(at: indexPath)
+        } catch let error {
+            print(error.localizedDescription)
+        }
         updateCategories()
     }
     
@@ -33,13 +43,33 @@ extension CategoriesViewModel: CategoriesViewModelProtocol {
         updateCategories()
     }
     
-    func deleteCategory(at indexPath: IndexPath) {
-        do {
-            try categoryStore.deleteCategory(at: indexPath)
-        } catch let error {
-            print(error.localizedDescription)
-        }
-        updateCategories()
+    
+//    func setCategory(category: TrackerCategory?) {
+//        guard let category = category else { return }
+//        do {
+//            try categoryStore.addCategory(category: category)
+//        } catch let error {
+//            print(error.localizedDescription)
+//        }
+//        updateCategories()
+//    }
+//
+//    func deleteCategory(category: TrackerCategory)  {
+//        do {
+//            try categoryStore.deleteCategory(category: category)
+//        }  catch let error {
+//            print(error.localizedDescription)
+//        }
+//        updateCategories()
+//    }
+    
+    
+    func editCategory(at indexPath: IndexPath) {
+        
+    }
+    
+    func changeCategoryName(at indexPath: IndexPath, to newName: String) {
+        categoryStore.changeCategoryName(at: indexPath, to: newName)
     }
 }
 

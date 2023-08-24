@@ -18,6 +18,13 @@ final class TrackerRecordStore: NSObject {
         self.context = context
     }
     
+//    var trackerRecords: [TrackerRecord] {
+//        guard let objects = self.fetchedResultsController.fetchedObjects,
+//              let trackerRecords = try? objects.map({ try self.trackerRecords (from: $0)})
+//        else { return [] }
+//        return trackerRecords
+//    }
+        
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
         
@@ -95,6 +102,8 @@ final class TrackerRecordStore: NSObject {
         }
         return currentRecord
     }
+    
+  
 }
 
 // MARK: - Extensions

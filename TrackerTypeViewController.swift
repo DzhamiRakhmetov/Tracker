@@ -6,6 +6,7 @@ import UIKit
 enum TrackerType {
     case regular
     case irregular
+    case existing
 }
 
 // MARK: - final class TrackerTypeViewController
@@ -17,7 +18,8 @@ final class TrackerTypeViewController: UIViewController {
     private lazy var titileLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Создание трекера"
+        label.text = "Создание трекера".localized()
+        label.textColor = .custom.ypBlack
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
@@ -29,8 +31,9 @@ final class TrackerTypeViewController: UIViewController {
         button.backgroundColor = .black
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
-        button.setTitle("Привычка", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitle("Привычка".localized(), for: .normal)
+        button.backgroundColor = .custom.ypBlack
+        button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.addTarget(self, action: #selector(regularButtonClicked), for: .touchUpInside)
         return button
@@ -42,8 +45,9 @@ final class TrackerTypeViewController: UIViewController {
         button.backgroundColor = .black
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
-        button.setTitle("Нерегулярные событие", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitle("Нерегулярное событие".localized(), for: .normal)
+        button.backgroundColor = .custom.ypBlack
+        button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.addTarget(self, action: #selector(irregularButtonClicked), for: .touchUpInside)
         return button
@@ -84,16 +88,14 @@ final class TrackerTypeViewController: UIViewController {
     // MARK: - @objc func
     
     @objc func irregularButtonClicked() {
-        let vc = TrackerCreationViewController()
-        vc.trackerType = .irregular
+        let vc = TrackerCreationViewController(trackerType: .irregular)
         vc.trackerStore = self
         present(vc, animated: true)
     }
     
     @objc
     func regularButtonClicked() {
-        let vc = TrackerCreationViewController()
-        vc.trackerType = .regular
+        let vc = TrackerCreationViewController(trackerType: .regular)
         vc.trackerStore = self
         present(vc, animated: true)
     }

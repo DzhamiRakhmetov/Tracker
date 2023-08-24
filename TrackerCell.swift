@@ -6,17 +6,21 @@ import UIKit
 protocol TrackerCellDelegate: AnyObject {
     func completeTracker(_ trackerCell: TrackerCell, id: UUID, at indexPath: IndexPath, isOn: Bool)
     func deleteTracker(at indexPath: IndexPath)
+    func editTracker(at indexPath: IndexPath)
+    func pinTrackerTapped(at indexPath: IndexPath)
 }
 
 // MARK: - final class TrackerCell
 
 final class TrackerCell: UICollectionViewCell {
     
+    private let analyticsService = AnalyticsService()
     weak var delegate: TrackerCellDelegate?
     private var isCompletedToday: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
     private var selectedDate: Date?
+    private var isTrackerPinned: Bool = false
     
     private lazy var trackerView: UIView = {
         let view = UIView()
@@ -31,7 +35,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 16)
-        label.backgroundColor = .custom.white.withAlphaComponent(0.3)
+        label.backgroundColor = .white.withAlphaComponent(0.3)
         label.layer.cornerRadius = 12
         label.layer.masksToBounds = true
         label.textAlignment = .center
@@ -42,7 +46,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .custom.white
+        label.textColor = .white
         label.numberOfLines = 0
         return label
     }()
@@ -51,7 +55,7 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .custom.black
+        label.textColor = .custom.ypBlack
         return label
     }()
     
@@ -67,6 +71,14 @@ final class TrackerCell: UICollectionViewCell {
         button.setImage(image, for: .normal)
         button.addTarget(self, action: #selector(increaseDayCounter), for: .touchUpInside)
         return button
+    }()
+    
+    lazy var pinnedImage: UIImageView = {
+        let element = UIImageView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        element.image = UIImage(systemName: "pin.fill")
+        element.tintColor = .white
+        return element
     }()
     
     // MARK: - LifeCycle
@@ -114,35 +126,20 @@ final class TrackerCell: UICollectionViewCell {
         dayCounterButton.backgroundColor = tracker.color
         dayCounterButton.isHidden = selectedDate > Date()
         
+        pinnedImage.isHidden = !tracker.isPinned
+        
+        if tracker.isPinned { isTrackerPinned = true } else { isTrackerPinned = false }
+        
         trackerNameLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
-        dayCounterLabel.text = "\(completedDays) \(dayString(for: completedDays))"
+        dayCounterLabel.text = String.localizedStringWithFormat(NSLocalizedString("completedDays", comment: "Число дней"), completedDays)
         
         let image = isCompletedToday ? setDoneImage() : setPlusImage()
-       // setDayCounterButton(is: isCompletedToday)
-    
     }
-    
-    private func dayString(for count: Int) -> String {
-        let mod10 = count % 10
-        let mod100 = count % 100
-        let not10To20 = mod100 < 10 || mod100 > 20
-        
-        if count == 0 {
-            return "дней"
-        } else if mod10 == 1 && not10To20 {
-            return "день"
-        } else if (mod10 >= 2 && mod10 <= 4) && not10To20 {
-            return "дня"
-        } else {
-            return "дней"
-        }
-    }
-    
     
     private func setUpConstraints() {
         [ trackerView, dayCounterLabel, dayCounterButton].forEach {contentView.addSubview($0)}
-        [emojiLabel, trackerNameLabel].forEach {trackerView.addSubview($0)}
+        [emojiLabel, trackerNameLabel, pinnedImage].forEach {trackerView.addSubview($0)}
         
         NSLayoutConstraint.activate([
             trackerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -158,6 +155,11 @@ final class TrackerCell: UICollectionViewCell {
             trackerNameLabel.leadingAnchor.constraint(equalTo: trackerView.leadingAnchor, constant: 12),
             trackerNameLabel.trailingAnchor.constraint(equalTo: trackerView.trailingAnchor, constant: -12),
             trackerNameLabel.bottomAnchor.constraint(equalTo: trackerView.bottomAnchor, constant: -12),
+            
+            pinnedImage.widthAnchor.constraint(equalToConstant: 14),
+            pinnedImage.heightAnchor.constraint(equalToConstant: 14),
+            pinnedImage.trailingAnchor.constraint(equalTo: trackerView.trailingAnchor, constant: -10),
+            pinnedImage.topAnchor.constraint(equalTo: trackerView.topAnchor, constant: 12),
             
             dayCounterLabel.topAnchor.constraint(equalTo: trackerView.bottomAnchor, constant: 16),
             dayCounterLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
@@ -177,6 +179,9 @@ final class TrackerCell: UICollectionViewCell {
         }
         dayCounterButton.isEnabled = true
         delegate?.completeTracker(self, id: trackerId, at: indexPath, isOn: isCompletedToday)
+        
+        analyticsService.report(event: "click", params: ["main_screen": "track"])
+        print("Event : click tracker completed ")
     }
 }
 
@@ -190,19 +195,29 @@ extension TrackerCell: UIContextMenuInteractionDelegate {
     }
     
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        
+     
         let deleteImage = UIImage(systemName: "trash")
         let editImage = UIImage(systemName: "square.and.pencil")
         
         return UIContextMenuConfiguration(actionProvider: { actions in
             return UIMenu(children: [
-                UIAction(title: "Редактировать", image: editImage) { [weak self] _ in
-                    guard let self = self else { return }
-                    //   self.editTracker(cell: self)
-                },
-                UIAction(title: "Удалить", image: deleteImage, attributes: .destructive) { [weak self] _ in
+                
+                UIAction(title: self.isTrackerPinned ? "Открепить".localized() : "Закрепить".localized(), image: nil) { [weak self] _ in
                     guard let self = self, let indexPath = indexPath else { return }
-                    delegate?.deleteTracker(at: indexPath)
+                 delegate?.pinTrackerTapped(at: indexPath)
+                },
+                
+                UIAction(title: "Редактировать".localized(), image: editImage) { [weak self] _ in
+                    guard let self = self, let indexPath = indexPath else { return }
+                    delegate?.editTracker(at: indexPath)
+                    analyticsService.report(event: "click", params: ["main_screen": "edit"])
+                    print("Event : click Редактировать")
+                },
+                UIAction(title: "Удалить".localized(), image: deleteImage, attributes: .destructive) { [weak self] _ in
+                    guard let self = self, let indexPath = indexPath else { return }
+                     delegate?.deleteTracker(at: indexPath)
+                    analyticsService.report(event: "click", params: ["main_screen": "delete"])
+                    print("Event : click Удалить")
                 }
             ])
         })

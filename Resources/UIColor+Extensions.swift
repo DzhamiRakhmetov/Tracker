@@ -8,18 +8,25 @@
 import UIKit
 
 extension UIColor {
-
-   static var custom: CustomColor  { return CustomColor()}
+    
+    static var custom: CustomColor  { return CustomColor()}
     
     struct CustomColor {
         var red: UIColor { return UIColor(named: NameColor.red.rawValue) ?? UIColor.systemRed }
         var blue: UIColor { return UIColor(named: NameColor.blue.rawValue) ?? UIColor.blue }
-        var backgroundDay: UIColor { return UIColor(named: NameColor.backgroundDay.rawValue) ?? UIColor.systemBackground }
-        var BackgroundNight: UIColor { return UIColor(named: NameColor.BackgroundNight.rawValue) ?? UIColor.systemBackground }
+        var backgroundDay: UIColor { return UIColor(named: NameColor.backgroundDay.rawValue) ?? UIColor.red }
+        var backgroundNight: UIColor { return UIColor(named: NameColor.backgroundNight.rawValue) ?? UIColor.systemBackground }
+        var backgroundColor: UIColor { UIColor(named: "BackgroundColor") ?? .systemGray5 }
+        var ypBlack: UIColor { UIColor(named: NameColor.ypBlack.rawValue) ?? .black}
         var lightGray: UIColor { return UIColor(named: NameColor.lightGray.rawValue) ?? UIColor.gray }
         var gray: UIColor { return UIColor(named: NameColor.gray.rawValue) ?? UIColor.gray }
         var white: UIColor { return UIColor(named: NameColor.white.rawValue) ?? UIColor.white }
         var black: UIColor { return UIColor(named: NameColor.black.rawValue) ?? UIColor.black }
+        let viewBackgroundColor = UIColor.systemBackground
+        
+        var firstGradientColor: UIColor { UIColor(named: "FirstGradientColor") ?? .systemRed }
+        var secondGradientColor: UIColor { UIColor(named: "SecondGradientColor") ?? .systemGreen }
+        var thirdGradientColor: UIColor { UIColor(named: "ThirdGradientColor") ?? .systemBlue }
         
         var colorSelection1: UIColor { return UIColor(named: SelectionColor.ColorSelection1.rawValue) ?? UIColor.white }
         var colorSelection2: UIColor { return UIColor(named: SelectionColor.ColorSelection2.rawValue) ?? UIColor.white }
@@ -45,12 +52,13 @@ extension UIColor {
 enum NameColor: String {
     case red = "Red"
     case blue = "Blue"
-    case backgroundDay = "Background.day"
-    case BackgroundNight = "Background.night"
+    case backgroundDay = "Background.Day"
+    case backgroundNight = "Background.night"
     case lightGray = "LightGray"
     case gray = "Grey"
     case white = "White"
     case black = "Black"
+    case ypBlack = "ypBlack"
 }
 
 enum SelectionColor: String, CaseIterable {

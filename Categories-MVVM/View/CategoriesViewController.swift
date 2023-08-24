@@ -38,13 +38,6 @@ final class CategoriesViewController: UIViewController {
         categoryView.translatesAutoresizingMaskIntoConstraints = false
         categoryView.didSelectCategory = doneButtonClicked
         categoryView.delegate = self
-        
-        NSLayoutConstraint.activate([
-            categoryView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            categoryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            categoryView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            categoryView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
     }
     
     func doneButtonClicked() -> Void {
@@ -52,11 +45,20 @@ final class CategoriesViewController: UIViewController {
         newCategoryViewController.delegate = self
         present(newCategoryViewController, animated: true)
     }
+    
+    private func switchToEditingVC() {
+        let editingVC = EditCategoryViewController()
+        present(editingVC, animated: true)
+    }
 }
 
 // MARK: - Extensions
 
 extension CategoriesViewController: NewCategoryViewControllerDelegate {
+    func updateTableView() {
+        categoryView.tableView.reloadData()
+    }
+    
     func setCategory(category: String?) {
         viewModel.setCategory(category: category)
     }
@@ -65,10 +67,41 @@ extension CategoriesViewController: NewCategoryViewControllerDelegate {
 extension CategoriesViewController: CategoriesViewModelDelegate {
     func reloadDataCategories(_ array: [String]) {
         categoryView.categories = array
+        categoryView.tableView.reloadData()
     }
 }
 
 extension CategoriesViewController: UICategoryListViewDelegate {
+    
+    func editCategory(at indexPath: IndexPath) {
+        switchToEditingVC()
+        viewModel.editCategory(at: indexPath)
+    }
+    
+    
+    func didDelete(at index: IndexPath) {
+        let alert = UIAlertController(
+            title: nil,
+            message: "Эта категория точно не нужна?".localized(),
+            preferredStyle: .actionSheet)
+        
+        let deleteAction = UIAlertAction(
+            title: "Удалить".localized(),
+            style: .destructive) { [weak self] _ in
+                
+                guard let self = self else { return }
+                viewModel.deleteCategory(at: index)
+            }
+        
+        let cancelAction = UIAlertAction(
+            title: "Отменить",
+            style: .cancel)
+        
+        alert.addAction(cancelAction)
+        alert.addAction(deleteAction)
+        present(alert, animated: true)
+    }
+    
     func didSelect(_ category: String) {
         delegate?.selectCategory(category)
         dismiss(animated: true) {}

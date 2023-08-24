@@ -11,7 +11,12 @@ protocol TrackerStoreProtocol: AnyObject {
 
 final class TrackerCreationViewController: UIViewController {
     
-    var dataForTableView = ["Категория", "Расписание"]
+    private var trackerID = UUID()
+    private var isPinned = false
+    private var trackerTextFiledConstraint = NSLayoutConstraint()
+    private var tableViewHightConstraint = NSLayoutConstraint()
+    
+    var dataForTableView = ["Категория".localized(), "Расписание".localized()]
     var trackerStore: TrackerStoreProtocol?
     var trackerType: TrackerType?
     let scheduleService = ScheduleService()
@@ -25,6 +30,7 @@ final class TrackerCreationViewController: UIViewController {
     private var scheduleSubTitle: String = ""
     private let emojies: [String] = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
     private lazy var buttonsTableViewHeight: CGFloat = 150
+    
     private let colors: [UIColor] = SelectionColor.allCases.compactMap({UIColor(named: $0.rawValue)})
     private var contentSize : CGSize  {
         CGSize(width: view.frame.width, height: view.frame.height + 105)
@@ -32,7 +38,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var contentView: UIView = {
         let contentView = UIView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
         contentView.frame.size = contentSize
         return contentView
     }()
@@ -40,8 +46,6 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.contentSize = contentSize
-        scrollView.frame = view.bounds
         return scrollView
     }()
     
@@ -49,9 +53,9 @@ final class TrackerCreationViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         if trackerType == .regular {
-            label.text = "Новая привычка"
+            label.text = "Новая привычка".localized()
         } else {
-            label.text = "Новое нерегулярное действие"
+            label.text = "Новое нерегулярное действие".localized()
         }
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -64,7 +68,7 @@ final class TrackerCreationViewController: UIViewController {
         textFiled.translatesAutoresizingMaskIntoConstraints = false
         textFiled.layer.cornerRadius = 16
         textFiled.layer.masksToBounds = true
-        textFiled.placeholder = "Введите название трекера"
+        textFiled.placeholder = "Введите название трекера".localized()
         textFiled.backgroundColor = .custom.backgroundDay
         textFiled.clearButtonMode = .whileEditing
         textFiled.isUserInteractionEnabled = true
@@ -114,7 +118,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Цвет"
+        label.text = "Цвет".localized()
         label.font = UIFont.boldSystemFont(ofSize: 19)
         return label
     }()
@@ -140,7 +144,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle("Отменить".localized(), for: .normal)
         button.setTitleColor(.custom.red, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.backgroundColor = .custom.white
@@ -155,7 +159,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var createButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Создать", for: .normal)
+        button.setTitle("Создать".localized(), for: .normal)
         button.setTitleColor(.custom.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.backgroundColor = .custom.gray
@@ -168,7 +172,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var charactersLimitLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Ограничение 38 символов"
+        label.text = "Ограничение 38 символов".localized()
         label.font = UIFont.systemFont(ofSize: 17)
         label.textColor = .custom.red
         label.alpha = 0.0 // непрозрачныйу
@@ -191,6 +195,14 @@ final class TrackerCreationViewController: UIViewController {
         return view
     }()
     
+    private lazy var daysCounterLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.boldSystemFont(ofSize: 23)
+        label.text = "TEST"
+        return label
+    }()
+    
     private var isTrackerDataComplete: Bool {
         let isTrackerNameSelect = selectedTrackerName
         let isCategorySelect = selectedCategory
@@ -200,11 +212,36 @@ final class TrackerCreationViewController: UIViewController {
         return (isTrackerNameSelect != nil) && (isCategorySelect != nil) && isScheduleSelect && (isEmojiSelect != nil) && (isColorSelect != nil)
     }
     
+    
+    init(trackerType: TrackerType) {
+        self.trackerType = trackerType
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .custom.white
-        setUpViewController()
         setUpConstraints()
+        setUpViewController()
+    }
+    
+    private func setUpViewController() {
+        
+        if trackerType == .irregular {
+            selectedSchedule = []
+            WeekDay.allCases.forEach { selectedSchedule.append(WeekDay.fromWeekDay($0))}
+            buttonsTableView.separatorStyle = .none
+            buttonsTableViewHeight = 75
+            buttonsTableView.heightAnchor.constraint(equalToConstant: buttonsTableViewHeight).isActive = true
+        } else if trackerType == .existing {
+            titileLabel.text = "Редактирование привычки"
+            setupDaysCounterLabelConstraints()
+            createButton.setTitle("Сохранить".localized(), for: .normal)
+        }
     }
     
     
@@ -212,6 +249,8 @@ final class TrackerCreationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         [ titileLabel ,trackerTextFiled, emojiLabel, colorLabel, buttonsTableView, emojisCollectionView, colorsCollectionView, cancelButton, createButton].forEach {contentView.addSubview($0)}
+        
+        trackerTextFiledConstraint = trackerTextFiled.topAnchor.constraint(equalTo: titileLabel.bottomAnchor, constant: 38)
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -228,7 +267,7 @@ final class TrackerCreationViewController: UIViewController {
             titileLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             titileLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
-            trackerTextFiled.topAnchor.constraint(equalTo: titileLabel.bottomAnchor, constant: 38),
+            trackerTextFiledConstraint,
             trackerTextFiled.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             trackerTextFiled.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             trackerTextFiled.heightAnchor.constraint(equalToConstant: 75),
@@ -256,7 +295,7 @@ final class TrackerCreationViewController: UIViewController {
             
             cancelButton.topAnchor.constraint(equalTo: colorsCollectionView.bottomAnchor, constant: 45),
             cancelButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            //cancelButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
+            cancelButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             
             createButton.topAnchor.constraint(equalTo: colorsCollectionView.bottomAnchor, constant: 45),
@@ -267,13 +306,30 @@ final class TrackerCreationViewController: UIViewController {
         ])
     }
     
-    private func setUpViewController() {
-        if trackerType == .irregular {
-            selectedSchedule = []
-            buttonsTableViewHeight = 75
-            buttonsTableView.separatorStyle = .none
-        }
+    private func setupDaysCounterLabelConstraints() {
+        
+        trackerTextFiledConstraint.isActive = false
+        contentView.addSubview(daysCounterLabel)
+        NSLayoutConstraint.activate([
+            daysCounterLabel.topAnchor.constraint(equalTo: titileLabel.bottomAnchor, constant: 38),
+            daysCounterLabel.bottomAnchor.constraint(equalTo: trackerTextFiled.topAnchor, constant: -40),
+            daysCounterLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
+        ])
     }
+    
+    func edit(existing tracker: Tracker, in category: String, with dayCounter: Int, isPinned: Bool) {
+        selectedCategory = category
+        selectedTrackerName = tracker.name
+        selectedSchedule = tracker.schedule ?? []
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        trackerID = tracker.id
+        self.isPinned = isPinned
+        let daysTitle = String.localizedStringWithFormat(NSLocalizedString("completedDays", comment: "Число дней"))
+        daysCounterLabel.text = "\(dayCounter) " 
+    }
+    
+    
     
     private func tapScheduleCell(){
         let scheduleViewController = ScheduleViewController()
@@ -323,7 +379,7 @@ final class TrackerCreationViewController: UIViewController {
             name: trackerTextFiled.text ?? "",
             color: selectedColor ?? .custom.black,
             emoji: selectedEmoji ?? "",
-            schedule: selectedSchedule)
+            schedule: selectedSchedule, isPinned: false)
         
         dismiss(animated: true) {
             self.trackerStore?.createTracker(newTracker, categoryName: selectedCategory)
@@ -379,7 +435,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
 extension TrackerCreationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch trackerType {
-        case .regular:
+        case .regular, .existing:
             return 2
         case .irregular:
             return 1
